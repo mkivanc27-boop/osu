@@ -3,228 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kozmik - Aim & Rhythm</title>
+    <title>Osu Faceİt</title>
     <style>
-        :root {
-            --bg: #0f172a; --panel: #1e293b; --primary: #38bdf8;
-            --success: #4ade80; --danger: #ef4444; --warning: #fbbf24;
-            --text: #f8fafc; --text-muted: #94a3b8;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); overflow: hidden; width: 100vw; height: 100vh; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: white; overflow: hidden; transition: background-color 0.3s; }
         
-        .screen { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        #menuScreen { display: flex; background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%); }
+        .screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        #menuScreen { background: radial-gradient(circle, rgba(30,41,59,0.8) 0%, rgba(15,23,42,1) 100%); z-index: 20; }
+        #settingsScreen { background: rgba(15,23,42,0.95); display: none; z-index: 30; }
+        #gameScreen { display: none; cursor: none; }
+        #gameOverScreen { background: rgba(15, 23, 42, 0.95); display: none; z-index: 30; }
+
+        h1 { font-size: 4rem; color: #d946ef; text-shadow: 0 0 20px rgba(217, 70, 239, 0.5); margin-bottom: 0.5rem; text-align: center; font-weight: 900; letter-spacing: 2px; }
+        h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #f8fafc; text-align: center; }
         
-        .panel { background: rgba(30, 41, 59, 0.9); padding: 2rem; border-radius: 1rem; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; max-width: 500px; width: 90%; backdrop-filter: blur(10px); }
-        h1 { font-size: 3rem; margin-bottom: 0.5rem; background: linear-gradient(to right, #38bdf8, #c026d3); -webkit-background-clip: text; color: transparent; text-shadow: 0 0 20px rgba(56,189,248,0.3); }
+        .btn { background: #c026d3; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 8px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .btn:hover { background: #d946ef; transform: translateY(-3px) scale(1.02); box-shadow: 0 0 20px #d946ef; }
+        .btn-ranked { background: #ef4444; } .btn-ranked:hover { background: #f87171; box-shadow: 0 0 20px #ef4444; }
+        .btn-endless { background: #10b981; } .btn-endless:hover { background: #34d399; box-shadow: 0 0 20px #10b981; }
+        .btn-fun { background: #f59e0b; } .btn-fun:hover { background: #fbbf24; box-shadow: 0 0 20px #f59e0b; }
+        .btn-secondary { background: #475569; } .btn-secondary:hover { background: #64748b; box-shadow: 0 0 15px #64748b; }
+
+        .profile-box { background: rgba(30, 41, 59, 0.8); border: 2px solid #334155; padding: 15px 30px; border-radius: 12px; margin-bottom: 20px; text-align: center; min-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        .profile-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 5px; }
+        .profile-rank { font-size: 2rem; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 10px currentColor; }
+        .profile-rp { font-size: 1.1rem; color: #94a3b8; }
+        .profile-stats { font-size: 0.9rem; color: #64748b; margin-top: 10px; border-top: 1px solid #334155; padding-top: 10px; }
+
+        .settings-container { background: #1e293b; padding: 25px; border-radius: 15px; border: 2px solid #334155; width: 650px; max-width: 95%; max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; }
+        .tabs { display: flex; border-bottom: 2px solid #334155; margin-bottom: 20px; }
+        .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #94a3b8; transition: 0.2s; }
+        .tab.active { color: #d946ef; border-bottom: 3px solid #d946ef; background: rgba(217, 70, 239, 0.1); }
+        .tab-content { display: none; flex-direction: column; gap: 15px; }
+        .tab-content.active { display: flex; }
         
-        .profile-card { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(56,189,248,0.2); }
-        .profile-card h2 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-        .rank-text { font-size: 1.2rem; font-weight: bold; margin-bottom: 0.5rem; }
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; font-size: 0.9rem; color: var(--text-muted); }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 20px; border-radius: 8px; font-size: 1.1rem; border: 1px solid #334155; }
+        .setting-row label { color: #e2e8f0; font-weight: 600; }
+        input[type="text"], select, input[type="range"] { padding: 8px 12px; background: #334155; color: white; border: 1px solid #475569; border-radius: 5px; font-size: 1rem; outline: none; }
+        input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 5px; cursor: pointer; background: transparent; }
+        input[type="checkbox"] { width: 20px; height: 20px; accent-color: #d946ef; cursor: pointer; }
+
+        #hud { position: absolute; top: 15px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; z-index: 5; text-shadow: 2px 2px 4px #000; }
+        #scoreDisplay { font-size: 2.5rem; color: #fff; font-weight: 900; line-height: 1; margin-bottom: 5px; }
+        #timerDisplay { font-size: 1.8rem; color: #fbbf24; font-weight: bold; }
+        .hud-sub-row { display: flex; gap: 15px; font-size: 1.3rem; align-items: center; }
+        #accDisplay { color: #4ade80; font-weight: bold; }
         
-        .btn { display: block; width: 100%; padding: 1rem; margin-bottom: 0.75rem; border: none; border-radius: 0.5rem; font-size: 1.1rem; font-weight: bold; cursor: pointer; transition: all 0.2s; background: var(--panel); color: var(--text); border: 1px solid rgba(255,255,255,0.1); }
-        .btn:hover { transform: translateY(-2px); background: rgba(255,255,255,0.1); border-color: var(--primary); box-shadow: 0 0 15px rgba(56,189,248,0.3); }
-        .btn-primary { background: linear-gradient(45deg, #0284c7, #2563eb); border: none; }
-        .btn-primary:hover { background: linear-gradient(45deg, #0369a1, #1d4ed8); }
-        .btn-danger { background: linear-gradient(45deg, #b91c1c, #e11d48); border: none; }
-        .btn-danger:hover { background: linear-gradient(45deg, #991b1b, #be123c); }
-        .btn-warning { background: linear-gradient(45deg, #b45309, #d97706); border: none; }
-        .btn-warning:hover { background: linear-gradient(45deg, #92400e, #b45309); }
-                #gameScreen { display: none; background: transparent; }
-        canvas { display: block; width: 100vw; height: 100vh; cursor: none; }
+        #comboContainer { position: absolute; bottom: 20px; left: 25px; pointer-events: none; z-index: 5; text-shadow: 2px 2px 4px #000; }
+        #comboDisplay { font-size: 3.5rem; font-weight: 900; color: #38bdf8; transition: 0.1s; }
         
-        .hud { position: absolute; top: 0; left: 0; width: 100%; padding: 1.5rem; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; z-index: 5; }
-        .hud-left, .hud-right { display: flex; flex-direction: column; gap: 0.5rem; }
-        .hud-right { align-items: flex-end; }
-        
-        .score { font-size: 3rem; font-weight: bold; font-family: monospace; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); line-height: 1; }
-        .combo { font-size: 2rem; font-weight: bold; color: var(--primary); text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
-        .acc, .timer { font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.8); }
-        
-        .health-bar-container { width: 300px; height: 10px; background: rgba(0,0,0,0.5); border-radius: 5px; margin-top: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2); display: none; }
-        .health-bar { height: 100%; width: 100%; background: var(--success); transition: width 0.2s, background-color 0.2s; }
-        
-        .flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(239, 68, 68, 0.3); pointer-events: none; opacity: 0; transition: opacity 0.1s; z-index: 2; }
-        
-        .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; }
-        .tab { flex: 1; padding: 0.5rem; cursor: pointer; text-align: center; border-radius: 0.25rem; font-weight: bold; color: var(--text-muted); transition: 0.2s; }
-        .tab:hover { background: rgba(255,255,255,0.05); }
-        .tab.active { background: rgba(56,189,248,0.2); color: var(--primary); }
-        .tab-content { display: none; text-align: left; max-height: 50vh; overflow-y: auto; padding-right: 0.5rem; }
-        .tab-content.active { display: block; }
-        
-        .setting-group { margin-bottom: 1rem; }
-        .setting-group label { display: block; margin-bottom: 0.25rem; font-size: 0.9rem; color: var(--text-muted); }
-        .setting-group select, .setting-group input[type="text"], .setting-group input[type="number"], .setting-group input[type="color"] { width: 100%; padding: 0.5rem; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: var(--text); border-radius: 0.25rem; }
-        .setting-group input[type="checkbox"] { transform: scale(1.2); margin-right: 0.5rem; }
-        .checkbox-label { display: flex; align-items: center; cursor: pointer; }
-        
-        .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; font-size: 1.2rem; }
-        .result-item { background: rgba(0,0,0,0.3); padding: 1rem; border-radius: 0.5rem; border: 1px solid rgba(255,255,255,0.1); }
-        .result-value { font-weight: bold; font-family: monospace; font-size: 1.5rem; }
-        
-        #rpResult { margin-top: 1rem; padding: 1rem; background: rgba(0,0,0,0.5); border-radius: 0.5rem; font-weight: bold; font-size: 1.2rem; display: none; }
-        
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
-        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+        #healthBarContainer { position: absolute; top: 20px; left: 20px; width: 300px; height: 25px; background: rgba(0,0,0,0.5); border: 2px solid #fff; border-radius: 12px; display: none; z-index: 5; overflow: hidden;}
+        #healthBar { width: 100%; height: 100%; background: #10b981; transition: width 0.2s, background 0.2s; }
+
+        canvas { display: block; width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
+        #flashOverlay { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(225, 29, 72, 0.4); opacity: 0; pointer-events: none; transition: opacity 0.1s; z-index: 15; }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(30,41,59,0.8); padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left; font-size: 1.2rem; border: 1px solid #334155; width: 100%; max-width: 500px;}
+        .stat-item span { font-weight: bold; float: right; }
+        #rpResult { font-size: 2rem; font-weight: bold; text-align: center; margin-top: 15px; padding: 10px; border-radius: 8px; display: none; }
+        .menu-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center;}
     </style>
 </head>
 <body>
+
+    <div id="flashOverlay"></div>
+
     <div id="menuScreen" class="screen">
-        <div class="panel">
-            <h1>KOZMİK</h1>
-            <div class="profile-card">
-                <h2 id="menuName">Oyuncu</h2>
-                <div id="menuRank" class="rank-text" style="color: #64748b;">Yerleştirme</div>
-                <div class="stats-grid">
-                    <div id="menuRP">RP: 0</div>
-                    <div>Maç: <span id="menuMatches">0</span></div>
-                    <div style="grid-column: span 2;">En Yüksek Skor: <span id="menuHighScore">0</span></div>
-                </div>
-            </div>
-            <button class="btn btn-primary" onclick="startGame('ranked')">Dereceli Maç</button>
-            <button class="btn" onclick="startGame('normal')">Antrenman (Süreli)</button>
-            <button class="btn btn-danger" onclick="startGame('sudden_death')">Ani Ölüm (1 Can)</button>
-            <button class="btn btn-warning" onclick="startGame('frenzy')">Frenzy (Çılgın Mod)</button>
-            <button class="btn" onclick="startGame('endless')">Sonsuz Mod</button>
-            <button class="btn" style="margin-top: 1rem; background: transparent;" onclick="openSettings()">Ayarlar & Profil</button>
+        <h1>OSU FACEİT</h1>
+        
+        <div class="profile-box">
+            <div class="profile-name" id="menuName">Oyuncu</div>
+            <div class="profile-rank" id="menuRank">Yerleştirme Bekleniyor</div>
+            <div class="profile-rp" id="menuRP">RP: 0</div>
+            <div class="profile-stats">Oynanan Dereceli: <span id="menuMatches">0</span> | Max Skor: <span id="menuHighScore">0</span></div>
+        </div>
+
+        <div class="menu-row">
+            <button class="btn btn-ranked" onclick="startGame('ranked')">🏆 Dereceli (60s)</button>
+            <button class="btn" onclick="startGame('normal')">🎯 Antrenman (60s)</button>
+            <button class="btn btn-endless" onclick="startGame('endless')">♾️ Sınırsız Mod</button>
+        </div>
+        <div class="menu-row" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; border: 1px solid #334155;">
+            <button class="btn btn-fun" onclick="startGame('sudden_death')">💀 Ani Ölüm</button>
+            <button class="btn btn-fun" onclick="startGame('frenzy')">🌪️ Kaos</button>
+            <button class="btn btn-secondary" onclick="openSettings()">⚙️ Ayarlar</button>
         </div>
     </div>
 
-    <div id="settingsScreen" class="screen" style="background: rgba(15,23,42,0.95);">
-        <div class="panel">
-            <h2>Ayarlar</h2>
+    <div id="settingsScreen" class="screen">
+        <h2>Ayarlar</h2>
+        <div class="settings-container">
             <div class="tabs">
-                <div class="tab active" onclick="switchTab(event, 'tabOynanis')">Oynanış</div>
-                <div class="tab" onclick="switchTab(event, 'tabGorsel')">Görsel</div>
-                <div class="tab" onclick="switchTab(event, 'tabProfil')">Profil</div>
+                <div class="tab active" onclick="switchTab(event, 'tabGame')">Oyun Modu</div>
+                <div class="tab" onclick="switchTab(event, 'tabVisual')">Görsel</div>
+                <div class="tab" onclick="switchTab(event, 'tabProfile')">Profil</div>
             </div>
-            
-            <div id="tabOynanis" class="tab-content active">
-                <div class="setting-group">
-                    <label>Hedef Tipi</label>
+
+            <div id="tabGame" class="tab-content active">
+                <div class="setting-row">
+                    <label>Antrenman Hedef Tipi:</label>
                     <select id="setTargetType">
-                        <option value="mixed">Karışık (Klasik + Slider)</option>
-                        <option value="circle">Sadece Klasik (Slider Yok)</option>
+                        <option value="mixed">Karışık (Önerilen)</option>
+                        <option value="circle">Sadece Klasik (Kaydırmasız)</option>
                         <option value="slider">Sadece Slider</option>
                     </select>
                 </div>
-                <div class="setting-group">
-                    <label>Hız (Antrenman/Sonsuz İçin)</label>
+                <div class="setting-row">
+                    <label>Oyun Hızı (Antrenman):</label>
                     <select id="setSpeed">
-                        <option value="slow">Yavaş</option>
-                        <option value="normal">Normal</option>
-                        <option value="fast">Hızlı</option>
+                        <option value="normal">Normal (Dengeli)</option>
+                        <option value="slow">Yavaş (Rahat)</option>
+                        <option value="fast">Hızlı (Zorlu)</option>
                     </select>
                 </div>
-                <div class="setting-group">
-                    <label class="checkbox-label"><input type="checkbox" id="setApproach"> Daralan Halka (Kapatırsan Dereceli Giremezsin)</label>
+                <div class="setting-row">
+                    <label>Halka Sistemi (Yaklaşma):</label>
+                    <input type="checkbox" id="setApproach">
                 </div>
-                <div class="setting-group">
-                    <label class="checkbox-label"><input type="checkbox" id="setShake"> Ekran Sarsıntısı</label>
+                <div class="setting-row">
+                    <label>Ekran Sarsıntısı:</label>
+                    <input type="checkbox" id="setShake">
                 </div>
-                <div class="setting-group">
-                    <label class="checkbox-label"><input type="checkbox" id="setHitText"> Vuruş Yazıları (300, 100, X)</label>
+                <div class="setting-row">
+                    <label>Vuruş Yazıları (300, 100):</label>
+                    <input type="checkbox" id="setHitText">
                 </div>
             </div>
-            
-            <div id="tabGorsel" class="tab-content">
-                <div class="setting-group">
-                    <label>İmleç İzi (Rütbe Gerektirir)</label>
+
+            <div id="tabVisual" class="tab-content">
+                <div class="setting-row"><label>Arka Plan:</label><input type="color" id="colorBg"></div>
+                <div class="setting-row"><label>Hedef (İç):</label><input type="color" id="colorTargetInner"></div>
+                <div class="setting-row"><label>Hedef (Dış):</label><input type="color" id="colorTargetOuter"></div>
+                <div class="setting-row"><label>Hedef Boyutu:</label><input type="range" id="sizeTarget" min="0.6" max="1.6" step="0.1"></div>
+                <div class="setting-row"><label>Crosshair Rengi:</label><input type="color" id="colorCrosshair"></div>
+                <div class="setting-row"><label>Crosshair Boyutu:</label><input type="range" id="sizeCrosshair" min="2" max="15" step="1"></div>
+            </div>
+
+            <div id="tabProfile" class="tab-content">
+                <div class="setting-row"><label>Oyuncu Adı:</label><input type="text" id="setProfileName" maxlength="15" placeholder="Adınızı girin..."></div>
+                <div class="setting-row">
+                    <label>Fare İzi (Trail):</label>
                     <select id="setTrailType">
                         <option value="none">Kapalı</option>
-                        <option value="standard">Standart Çizgi (Açık)</option>
-                        <option value="neon" id="optNeon">Neon Parlama (Altın+)</option>
-                        <option value="stardust" id="optStardust">Yıldız Tozu (Elmas+)</option>
-                        <option value="cosmic" id="optCosmic">Kozmik Enerji (Zenith+)</option>
+                        <option value="standard">Standart</option>
+                        <option value="neon" id="optNeon" disabled>Neon (Altın Göz+)</option>
+                        <option value="stardust" id="optStardust" disabled>Yıldız Tozu (Elmas+)</option>
+                        <option value="cosmic" id="optCosmic" disabled>Kozmik (OSU FACEİT)</option>
                     </select>
                 </div>
-                <div style="display:flex; gap:1rem;">
-                    <div class="setting-group" style="flex:1;"><label>Arka Plan</label><input type="color" id="colorBg"></div>
-                    <div class="setting-group" style="flex:1;"><label>Hedef Dış</label><input type="color" id="colorTargetOuter"></div>
-                    <div class="setting-group" style="flex:1;"><label>Hedef İç</label><input type="color" id="colorTargetInner"></div>
-                </div>
-                <div style="display:flex; gap:1rem;">
-                    <div class="setting-group" style="flex:1;"><label>İmleç Rengi</label><input type="color" id="colorCrosshair"></div>
-                    <div class="setting-group" style="flex:1;"><label>İz Rengi</label><input type="color" id="colorTrail"></div>
-                </div>
-                <div style="display:flex; gap:1rem;">
-                    <div class="setting-group" style="flex:1;"><label>Hedef Boyutu (Çarpan)</label><input type="number" id="sizeTarget" step="0.1" min="0.5" max="2.0"></div>
-                    <div class="setting-group" style="flex:1;"><label>İmleç Boyutu (px)</label><input type="number" id="sizeCrosshair" min="2" max="15"></div>
-                </div>
+                <div class="setting-row"><label>Trail Rengi:</label><input type="color" id="colorTrail"></div>
             </div>
-            
-            <div id="tabProfil" class="tab-content">
-                <div class="setting-group">
-                    <label>Görünen İsim</label>
-                    <input type="text" id="setProfileName" maxlength="15">
-                </div>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top:1rem;">* İlerlemeni sıfırlamak istiyorsan tarayıcı verilerini (localStorage) temizlemelisin.</p>
-            </div>
-            
-            <button class="btn btn-primary" style="margin-top: 1rem;" onclick="saveAndCloseSettings()">Kaydet ve Kapat</button>
         </div>
+        <br>
+        <button class="btn btn-secondary" onclick="saveAndCloseSettings()">Kaydet & Geri Dön</button>
     </div>
 
-    <div id="gameScreen" class="screen">
-        <div class="hud">
-            <div class="hud-left">
-                <div class="score" id="scoreDisplay">0</div>
-                <div class="combo" id="comboDisplay">0x</div>
-            </div>
-            <div class="hud-right">
-                <div class="acc" id="accDisplay">100%</div>
-                <div class="timer" id="timerDisplay">60.0</div>
-                <div class="health-bar-container" id="healthBarContainer">
-                    <div class="health-bar" id="healthBar"></div>
-                </div>
-            </div>
+    <div id="gameScreen" class="screen" style="background: transparent;">
+        <div id="healthBarContainer"><div id="healthBar"></div></div>
+        <div id="hud">
+            <div id="scoreDisplay">0</div>
+            <div id="timerDisplay">60.0</div>
+            <div class="hud-sub-row"><span id="accDisplay">100%</span></div>
         </div>
-        <div class="flash" id="flashOverlay"></div>
+        <div id="comboContainer"><div id="comboDisplay">0x</div></div>
         <canvas id="gameCanvas"></canvas>
     </div>
 
-    <div id="gameOverScreen" class="screen" style="background: rgba(15,23,42,0.95);">
-        <div class="panel">
-            <h1 id="gameOverTitle">Oyun Bitti!</h1>
-            <div class="score" style="margin: 1rem 0; color: var(--primary);" id="finalScore">0</div>
-            
-            <div class="result-grid">
-                <div class="result-item">Mükemmel (300)<br><span class="result-value" style="color: #38bdf8;" id="stat300">0</span></div>
-                <div class="result-item">İyi (100)<br><span class="result-value" style="color: #4ade80;" id="stat100">0</span></div>
-                <div class="result-item">Kötü (50)<br><span class="result-value" style="color: #fbbf24;" id="stat50">0</span></div>
-                <div class="result-item">Kaçan (X)<br><span class="result-value" style="color: #ef4444;" id="statMiss">0</span></div>
-            </div>
-            <div style="font-size: 1.2rem; margin-bottom: 1rem;">Maksimum Kombo: <span id="statMaxCombo" style="font-weight:bold; color: #c026d3;">0x</span></div>
-            
-            <div id="rpResult"></div>
-            
-            <button class="btn btn-primary" style="margin-top: 1.5rem;" onclick="goToMenu()">Menüye Dön</button>
+    <div id="gameOverScreen" class="screen">
+        <h2 id="gameOverTitle">Oyun Bitti!</h2>
+        <h1 id="finalScore" style="color: #fff; margin-bottom: 10px;">0</h1>
+        <div id="rpResult"></div>
+        <div class="stats-grid">
+            <div class="stat-item">Kusursuz (300): <span id="stat300" style="color: #38bdf8;">0</span></div>
+            <div class="stat-item">İyi (100): <span id="stat100" style="color: #4ade80;">0</span></div>
+            <div class="stat-item">Kurtarır (50): <span id="stat50" style="color: #fbbf24;">0</span></div>
+            <div class="stat-item">Kaçırılan (Miss): <span id="statMiss" style="color: #e11d48;">0</span></div>
+            <div class="stat-item" style="grid-column: span 2; text-align: center;">Maksimum Kombo: <span id="statMaxCombo" style="float: none; color: #d946ef;">0</span></div>
         </div>
-    </div>
-                            <script>
+        <button class="btn" onclick="goToMenu()">Ana Menüye Dön</button>
+                                                                                </div>
+        <script>
         const RANKS = [
             { id: 0, name: "Yerleştirme", minRP: -9999, color: "#64748b" },
-            { id: 1, name: "Bronz", minRP: 0, color: "#d97706", reqScore: 15000 },
-            { id: 2, name: "Gümüş", minRP: 200, color: "#cbd5e1", reqScore: 30000 },
-            { id: 3, name: "Altın", minRP: 400, color: "#fbbf24", reqScore: 55000 },
-            { id: 4, name: "Elmas", minRP: 700, color: "#38bdf8", reqScore: 80000 },
-            { id: 5, name: "Zümrüt", minRP: 1100, color: "#10b981", reqScore: 110000 },
-            { id: 6, name: "Zenith", minRP: 1600, color: "#ef4444", reqScore: 160000 }
+            { id: 1, name: "Çaylak", minRP: 0, color: "#94a3b8", reqScore: 15000 },
+            { id: 2, name: "Gümüş Hedef", minRP: 200, color: "#cbd5e1", reqScore: 30000 },
+            { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 55000 },
+            { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 80000 },
+            { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 110000 },
+            { id: 6, name: "OSU FACEİT", minRP: 1600, color: "#ef4444", reqScore: 160000 }
         ];
 
         const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas ? canvas.getContext('2d') : null;
-        let gameLoop, isPlaying = false, currentMode = '';
+        const ctx = canvas.getContext('2d');
+        let audioCtx, gameLoop, isPlaying = false, currentMode = '';
         let score = 0, combo = 0, maxCombo = 0, health = 100, timeLeft = 60;
         let stats = { hit300: 0, hit100: 0, hit50: 0, miss: 0 };
         let targets = [], floatingTexts = [], mouseTrail = [], particles = [];
         let lastSpawnTime = 0, lastTickTime = performance.now();
         let screenShake = 0, currentMouseX = window.innerWidth/2, currentMouseY = window.innerHeight/2;
-        let isHolding = false, audioCtx = null;
+        let isHolding = false;
 
         let profile = { name: "Oyuncu", rp: 0, matchesPlayed: 0, totalPlacementScore: 0, highScore: 0, rankId: 0 };
         let settings = {
@@ -236,21 +213,17 @@
         let spawnInterval = 900, approachRate = 1300, currentHitWindow = 220, baseRadius = 45;
 
         function loadData() {
-            try {
-                let savedProf = localStorage.getItem('kozmikProfile');
-                let savedSet = localStorage.getItem('kozmikSettings');
-                if(savedProf) profile = {...profile, ...JSON.parse(savedProf)};
-                if(savedSet) settings = {...settings, ...JSON.parse(savedSet)};
-                if(settings.approach === undefined) settings.approach = true;
-            } catch(e) { console.log("Veri yükleme hatası:", e); }
+            let savedProf = localStorage.getItem('kozmikProfile');
+            let savedSet = localStorage.getItem('kozmikSettings');
+            if(savedProf) profile = {...profile, ...JSON.parse(savedProf)};
+            if(savedSet) settings = {...settings, ...JSON.parse(savedSet)};
+            if(settings.approach === undefined) settings.approach = true;
             updateRankLogic(); applySettingsToUI(); updateMenuUI();
         }
 
         function saveData() {
-            try {
-                localStorage.setItem('kozmikProfile', JSON.stringify(profile));
-                localStorage.setItem('kozmikSettings', JSON.stringify(settings));
-            } catch(e) { console.log("Veri kaydetme hatası:", e); }
+            localStorage.setItem('kozmikProfile', JSON.stringify(profile));
+            localStorage.setItem('kozmikSettings', JSON.stringify(settings));
         }
 
         function updateRankLogic() {
@@ -265,32 +238,18 @@
         }
 
         function updateMenuUI() {
-            const elMenuName = document.getElementById('menuName');
-            const elMenuRank = document.getElementById('menuRank');
-            const elMenuRP = document.getElementById('menuRP');
-            const elMenuMatches = document.getElementById('menuMatches');
-            const elMenuHighScore = document.getElementById('menuHighScore');
-            
-            if(elMenuName) elMenuName.innerText = profile.name;
-            
-            let rInfo = RANKS.find(r => r.id === profile.rankId) || RANKS[0];
-            if(elMenuRank) {
-                elMenuRank.innerText = profile.rankId === 0 ? `Yerleştirme (${profile.matchesPlayed}/3)` : rInfo.name;
-                elMenuRank.style.color = rInfo.color;
-            }
-            if(elMenuRP) elMenuRP.innerText = profile.rankId === 0 ? "Bilinmiyor" : `RP: ${Math.round(profile.rp)}`;
-            if(elMenuMatches) elMenuMatches.innerText = profile.matchesPlayed;
-            if(elMenuHighScore) elMenuHighScore.innerText = profile.highScore;
+            document.getElementById('menuName').innerText = profile.name;
+            const rInfo = RANKS.find(r => r.id === profile.rankId);
+            document.getElementById('menuRank').innerText = profile.rankId === 0 ? `Yerleştirme (${profile.matchesPlayed}/3)` : rInfo.name;
+            document.getElementById('menuRank').style.color = rInfo.color;
+            document.getElementById('menuRP').innerText = profile.rankId === 0 ? "Bilinmiyor" : `RP: ${Math.round(profile.rp)}`;
+            document.getElementById('menuMatches').innerText = profile.matchesPlayed;
+            document.getElementById('menuHighScore').innerText = profile.highScore;
             document.body.style.backgroundColor = settings.bg;
 
-            const optNeon = document.getElementById('optNeon');
-            const optStardust = document.getElementById('optStardust');
-            const optCosmic = document.getElementById('optCosmic');
-            
-            if(optNeon) optNeon.disabled = profile.rankId < 3; 
-            if(optStardust) optStardust.disabled = profile.rankId < 4; 
-            if(optCosmic) optCosmic.disabled = profile.rankId < 6; 
-            
+            document.getElementById('optNeon').disabled = profile.rankId < 3; 
+            document.getElementById('optStardust').disabled = profile.rankId < 4; 
+            document.getElementById('optCosmic').disabled = profile.rankId < 6; 
             if(settings.trailType === "neon" && profile.rankId < 3) settings.trailType = "standard";
             if(settings.trailType === "stardust" && profile.rankId < 4) settings.trailType = "standard";
             if(settings.trailType === "cosmic" && profile.rankId < 6) settings.trailType = "standard";
@@ -299,57 +258,47 @@
         function switchTab(e, tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            if(e && e.currentTarget) e.currentTarget.classList.add('active');
-            const targetTab = document.getElementById(tabId);
-            if(targetTab) targetTab.classList.add('active');
+            e.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
         }
 
-        function openSettings() { 
-            applySettingsToUI(); 
-            const menuScr = document.getElementById('menuScreen');
-            const setScr = document.getElementById('settingsScreen');
-            if(menuScr) menuScr.style.display = 'none'; 
-            if(setScr) setScr.style.display = 'flex'; 
-        }
+        function openSettings() { applySettingsToUI(); document.getElementById('menuScreen').style.display = 'none'; document.getElementById('settingsScreen').style.display = 'flex'; }
 
         function applySettingsToUI() {
-            const elements = {
-                'setTargetType': settings.targetType, 'setSpeed': settings.speed, 'colorBg': settings.bg,
-                'colorTargetInner': settings.targetInner, 'colorTargetOuter': settings.targetOuter,
-                'sizeTarget': settings.targetSize, 'colorCrosshair': settings.crosshairColor,
-                'sizeCrosshair': settings.crosshairSize, 'setProfileName': profile.name,
-                'setTrailType': settings.trailType, 'colorTrail': settings.trailColor
-            };
-            for(let id in elements) {
-                let el = document.getElementById(id);
-                if(el) el.value = elements[id];
-            }
-            let chkApproach = document.getElementById('setApproach'); if(chkApproach) chkApproach.checked = settings.approach;
-            let chkShake = document.getElementById('setShake'); if(chkShake) chkShake.checked = settings.shake;
-            let chkHitText = document.getElementById('setHitText'); if(chkHitText) chkHitText.checked = settings.hitText;
+            document.getElementById('setTargetType').value = settings.targetType;
+            document.getElementById('setSpeed').value = settings.speed;
+            document.getElementById('setApproach').checked = settings.approach;
+            document.getElementById('setShake').checked = settings.shake;
+            document.getElementById('setHitText').checked = settings.hitText;
+            document.getElementById('colorBg').value = settings.bg;
+            document.getElementById('colorTargetInner').value = settings.targetInner;
+            document.getElementById('colorTargetOuter').value = settings.targetOuter;
+            document.getElementById('sizeTarget').value = settings.targetSize;
+            document.getElementById('colorCrosshair').value = settings.crosshairColor;
+            document.getElementById('sizeCrosshair').value = settings.crosshairSize;
+            document.getElementById('setProfileName').value = profile.name;
+            document.getElementById('setTrailType').value = settings.trailType;
+            document.getElementById('colorTrail').value = settings.trailColor;
         }
 
         function saveAndCloseSettings() {
-            if(document.getElementById('setTargetType')) settings.targetType = document.getElementById('setTargetType').value;
-            if(document.getElementById('setSpeed')) settings.speed = document.getElementById('setSpeed').value;
-            if(document.getElementById('setApproach')) settings.approach = document.getElementById('setApproach').checked;
-            if(document.getElementById('setShake')) settings.shake = document.getElementById('setShake').checked;
-            if(document.getElementById('setHitText')) settings.hitText = document.getElementById('setHitText').checked;
-            if(document.getElementById('colorBg')) settings.bg = document.getElementById('colorBg').value;
-            if(document.getElementById('colorTargetInner')) settings.targetInner = document.getElementById('colorTargetInner').value;
-            if(document.getElementById('colorTargetOuter')) settings.targetOuter = document.getElementById('colorTargetOuter').value;
-            if(document.getElementById('sizeTarget')) settings.targetSize = parseFloat(document.getElementById('sizeTarget').value);
-            if(document.getElementById('colorCrosshair')) settings.crosshairColor = document.getElementById('colorCrosshair').value;
-            if(document.getElementById('sizeCrosshair')) settings.crosshairSize = parseInt(document.getElementById('sizeCrosshair').value);
-            if(document.getElementById('setProfileName')) profile.name = document.getElementById('setProfileName').value || "Oyuncu";
-            if(document.getElementById('setTrailType')) settings.trailType = document.getElementById('setTrailType').value;
-            if(document.getElementById('colorTrail')) settings.trailColor = document.getElementById('colorTrail').value;
-            
+            settings.targetType = document.getElementById('setTargetType').value;
+            settings.speed = document.getElementById('setSpeed').value;
+            settings.approach = document.getElementById('setApproach').checked;
+            settings.shake = document.getElementById('setShake').checked;
+            settings.hitText = document.getElementById('setHitText').checked;
+            settings.bg = document.getElementById('colorBg').value;
+            settings.targetInner = document.getElementById('colorTargetInner').value;
+            settings.targetOuter = document.getElementById('colorTargetOuter').value;
+            settings.targetSize = parseFloat(document.getElementById('sizeTarget').value);
+            settings.crosshairColor = document.getElementById('colorCrosshair').value;
+            settings.crosshairSize = parseInt(document.getElementById('sizeCrosshair').value);
+            profile.name = document.getElementById('setProfileName').value || "Oyuncu";
+            settings.trailType = document.getElementById('setTrailType').value;
+            settings.trailColor = document.getElementById('colorTrail').value;
             saveData(); updateMenuUI();
-            const setScr = document.getElementById('settingsScreen');
-            const menuScr = document.getElementById('menuScreen');
-            if(setScr) setScr.style.display = 'none';
-            if(menuScr) menuScr.style.display = 'flex';
+            document.getElementById('settingsScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'flex';
         }
 
         class Particle {
@@ -361,34 +310,33 @@
                 this.alpha = 1;
             }
             update() { this.x += this.speedX; this.y += this.speedY; this.alpha -= (this.type==="cosmic"?0.02:0.04); }
-            draw(c) {
-                c.save(); c.globalAlpha = Math.max(0, this.alpha);
-                c.fillStyle = this.color;
-                if(this.type === "stardust") { c.shadowBlur = 10; c.shadowColor = this.color; }
-                c.beginPath(); c.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                c.fill(); c.restore();
+            draw(ctx) {
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
+                ctx.fillStyle = this.color;
+                if(this.type === "stardust") { ctx.shadowBlur = 10; ctx.shadowColor = this.color; }
+                ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill(); ctx.restore();
             }
         }
 
         class FloatingText {
             constructor(x, y, text, color) { this.x = x; this.y = y; this.text = text; this.color = color; this.life = 1.0; }
-            draw(c) {
+            draw(ctx) {
                 this.y -= 1.5; this.life -= 0.04;
-                c.save(); c.globalAlpha = Math.max(0, this.life);
-                c.fillStyle = this.color; c.shadowBlur = 5; c.shadowColor = "#000";
-                c.font = "bold 30px Arial"; c.textAlign = "center";
-                c.fillText(this.text, this.x, this.y); c.restore();
+                ctx.save(); ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color; ctx.shadowBlur = 5; ctx.shadowColor = "#000";
+                ctx.font = "bold 30px Arial"; ctx.textAlign = "center";
+                ctx.fillText(this.text, this.x, this.y); ctx.restore();
             }
         }
-        
-        class Target {
+                    class Target {
             constructor(x, y, time, isSlider) {
                 this.x = x; this.y = y; this.spawnTime = time; this.active = true;
                 this.type = isSlider ? 'slider' : 'circle';
                 this.radius = baseRadius * settings.targetSize;
                 this.apprRadius = this.radius * 3.5;
                 
-                if (isSlider && canvas) {
+                if (isSlider) {
                     let a = Math.random() * Math.PI*2, l = 150 + Math.random()*150;
                     this.endX = Math.max(80, Math.min(canvas.width-80, this.x + Math.cos(a)*l));
                     this.endY = Math.max(80, Math.min(canvas.height-80, this.y + Math.sin(a)*l));
@@ -397,9 +345,11 @@
             }
             update(time) {
                 let age = time - this.spawnTime;
+                
                 if (this.type === 'circle' || (this.type === 'slider' && this.state === 'waiting')) {
-                    if(!settings.approach) { this.apprRadius = this.radius; } 
-                    else {
+                    if(!settings.approach) {
+                        this.apprRadius = this.radius; // Halka yok, süresiz
+                    } else {
                         this.apprRadius = (this.radius * 3.5) - ((this.radius * 2.5) * (age / approachRate));
                         if (this.apprRadius < this.radius) this.apprRadius = this.radius;
                         if (age > approachRate + currentHitWindow) { this.active = false; registerMiss(this.x, this.y); }
@@ -417,32 +367,33 @@
                     }
                 }
             }
-            draw(c, time) {
-                if(!canvas) return;
-                c.save(); c.globalAlpha = Math.min(1, (time - this.spawnTime) / 150);
+            draw(ctx, time) {
+                ctx.save(); ctx.globalAlpha = Math.min(1, (time - this.spawnTime) / 150);
                 
                 if (this.type === 'slider') {
-                    c.beginPath(); c.moveTo(this.x, this.y); c.lineTo(this.endX, this.endY);
-                    c.lineWidth = this.radius * 1.8; c.strokeStyle = settings.targetOuter; c.lineCap = 'round'; c.stroke();
-                    c.lineWidth = this.radius * 1.8 + 4; c.strokeStyle = `${settings.targetInner}44`; c.stroke();
-                    c.beginPath(); c.arc(this.endX, this.endY, this.radius, 0, Math.PI*2);
-                    c.fillStyle = settings.bg; c.fill(); c.lineWidth = 3; c.strokeStyle = settings.targetInner; c.stroke();
+                    ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.endX, this.endY);
+                    ctx.lineWidth = this.radius * 1.8; ctx.strokeStyle = settings.targetOuter; ctx.lineCap = 'round'; ctx.stroke();
+                    ctx.lineWidth = this.radius * 1.8 + 4; ctx.strokeStyle = `${settings.targetInner}44`; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(this.endX, this.endY, this.radius, 0, Math.PI*2);
+                    ctx.fillStyle = settings.bg; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = settings.targetInner; ctx.stroke();
                 }
+
                 if (this.type === 'circle' || this.state === 'waiting') {
-                    c.beginPath(); c.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    c.fillStyle = settings.targetOuter; c.fill(); c.lineWidth = 3; c.strokeStyle = settings.targetInner; c.stroke();
-                    c.beginPath(); c.arc(this.x, this.y, this.radius * 0.3, 0, Math.PI * 2);
-                    c.fillStyle = settings.targetInner; c.fill();
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                    ctx.fillStyle = settings.targetOuter; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = settings.targetInner; ctx.stroke();
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 0.3, 0, Math.PI * 2);
+                    ctx.fillStyle = settings.targetInner; ctx.fill();
+                    
                     if(settings.approach) {
-                        c.beginPath(); c.arc(this.x, this.y, this.apprRadius, 0, Math.PI * 2); 
-                        c.lineWidth = 3; let opacity = Math.max(0, 1 - (this.apprRadius - this.radius) / (this.radius * 2));
-                        c.strokeStyle = `rgba(255,255,255,${opacity})`; c.stroke();
+                        ctx.beginPath(); ctx.arc(this.x, this.y, this.apprRadius, 0, Math.PI * 2); 
+                        ctx.lineWidth = 3; let opacity = Math.max(0, 1 - (this.apprRadius - this.radius) / (this.radius * 2));
+                        ctx.strokeStyle = `rgba(255,255,255,${opacity})`; ctx.stroke();
                     }
                 } else if (this.state === 'active') {
-                    c.beginPath(); c.arc(this.ballX, this.ballY, this.radius * 1.5, 0, Math.PI * 2);
-                    c.fillStyle = `${settings.targetInner}66`; c.fill(); c.strokeStyle = settings.targetInner; c.lineWidth = 3; c.stroke();
+                    ctx.beginPath(); ctx.arc(this.ballX, this.ballY, this.radius * 1.5, 0, Math.PI * 2);
+                    ctx.fillStyle = `${settings.targetInner}66`; ctx.fill(); ctx.strokeStyle = settings.targetInner; ctx.lineWidth = 3; ctx.stroke();
                 }
-                c.restore();
+                ctx.restore();
             }
         }
 
@@ -453,17 +404,15 @@
 
         function playSound(type) {
             if (!audioCtx) return;
-            try {
-                const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-                osc.connect(gain); gain.connect(audioCtx.destination);
-                if (type === 300) { osc.frequency.value = 880; osc.type = 'sine'; }
-                else if (type === 100) { osc.frequency.value = 587; osc.type = 'sine'; }
-                else if (type === 50) { osc.frequency.value = 440; osc.type = 'sine'; }
-                else if (type === 'miss') { osc.frequency.value = 150; osc.type = 'sawtooth'; }
-                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-            } catch(e){}
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            if (type === 300) { osc.frequency.value = 880; osc.type = 'sine'; }
+            else if (type === 100) { osc.frequency.value = 587; osc.type = 'sine'; }
+            else if (type === 50) { osc.frequency.value = 440; osc.type = 'sine'; }
+            else if (type === 'miss') { osc.frequency.value = 150; osc.type = 'sawtooth'; }
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.15);
         }
 
         function registerMiss(x, y) {
@@ -471,7 +420,8 @@
             if(settings.hitText) floatingTexts.push(new FloatingText(x, y, "X", "#e11d48"));
             if(settings.shake) screenShake = 6;
             let flash = document.getElementById('flashOverlay');
-            if(flash) { flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 80); }
+            flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 80);
+            
             if (currentMode === 'endless') { health -= 8; if(health <= 0) endGame(); }
             if (currentMode === 'sudden_death') { health = 0; endGame(); }
             updateHUD();
@@ -518,7 +468,7 @@
             }
         }
 
-        function resizeCanvas() { if(canvas) { canvas.width = window.innerWidth; canvas.height = window.innerHeight; } }
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resizeCanvas);
         
         function trackMouse(e) {
@@ -540,48 +490,39 @@
         document.addEventListener('keyup', (e) => { let k = e.key.toLowerCase(); if(k==='z' || k==='x') isHolding=false; });
 
         function updateHUD() {
-            const scrDisp = document.getElementById('scoreDisplay');
-            const cmbDisp = document.getElementById('comboDisplay');
-            const accDisp = document.getElementById('accDisplay');
-            const hlthBar = document.getElementById('healthBar');
-
-               if(scrDisp) scrDisp.innerText = score;
-            if(cmbDisp) {
-                cmbDisp.innerText = combo + "x";
-                cmbDisp.style.color = combo > 40 ? "#c026d3" : combo > 15 ? "#fbbf24" : "#38bdf8";
-            }
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('comboDisplay').innerText = combo + "x";
+            document.getElementById('comboDisplay').style.color = combo > 40 ? "#c026d3" : combo > 15 ? "#fbbf24" : "#38bdf8";
             let total = stats.hit300 + stats.hit100 + stats.hit50 + stats.miss;
             let acc = total > 0 ? Math.round(((stats.hit300 + stats.hit100*0.66 + stats.hit50*0.33) / total)*100) : 100;
-            if(accDisp) accDisp.innerText = acc + "%";
-            
-            if((currentMode === 'endless' || currentMode === 'sudden_death') && hlthBar) {
-                hlthBar.style.width = health + "%";
-                hlthBar.style.background = health > 50 ? "#10b981" : health > 20 ? "#fbbf24" : "#ef4444";
+            document.getElementById('accDisplay').innerText = acc + "%";
+            if(currentMode === 'endless' || currentMode === 'sudden_death') {
+                document.getElementById('healthBar').style.width = health + "%";
+                document.getElementById('healthBar').style.background = health > 50 ? "#10b981" : health > 20 ? "#fbbf24" : "#ef4444";
             }
         }
 
         function render(time) {
-            if(!isPlaying || !ctx || !canvas) return;
+            if(!isPlaying) return;
             let dt = time - lastTickTime; lastTickTime = time;
             
             if(currentMode === 'ranked' || currentMode === 'normal' || currentMode === 'frenzy') {
                 timeLeft -= dt/1000;
-                const tmrDisp = document.getElementById('timerDisplay');
-                if(tmrDisp) tmrDisp.innerText = Math.max(0, timeLeft).toFixed(1);
+                document.getElementById('timerDisplay').innerText = Math.max(0, timeLeft).toFixed(1);
                 if(timeLeft <= 0) { endGame(); return; }
             }
 
             ctx.save(); ctx.fillStyle = settings.bg; ctx.fillRect(0,0, canvas.width, canvas.height);
             if (screenShake > 0) { ctx.translate((Math.random()-.5)*screenShake, (Math.random()-.5)*screenShake); screenShake--; }
 
-            let limit = !settings.approach ? 15 : 99; 
+            let limit = !settings.approach ? 15 : 99; // Çok fazla süresiz top birikmesini engeller
             if (time - lastSpawnTime > spawnInterval && targets.length < limit) {
                 let m = 150, x = m + Math.random()*(canvas.width-m*2), y = m + Math.random()*(canvas.height-m*2);
                 let isSlider = false;
                 if(settings.targetType === 'slider') isSlider = true;
                 if(settings.targetType === 'mixed' && Math.random() < 0.25) isSlider = true;
                 if(currentMode === 'ranked' && Math.random() < 0.35) isSlider = true;
-                if(currentMode === 'frenzy') isSlider = false; 
+                if(currentMode === 'frenzy') isSlider = false; // Kaos modunda slider olmaz
                 
                 targets.push(new Target(x, y, time, isSlider)); lastSpawnTime = time;
             }
@@ -601,6 +542,7 @@
 
             particles.forEach(p => { p.update(); p.draw(ctx); }); particles = particles.filter(p => p.alpha > 0);
             
+            // SLIDER DENGESİZLİĞİ ÇÖZÜMÜ: Aktif slider varken diğer topların süresi duraklıyor
             let sliderActive = targets.some(t => t.type === 'slider' && t.state === 'active');
             targets.forEach(t => { 
                 if(sliderActive && t.state !== 'active') t.spawnTime += dt; 
@@ -619,6 +561,8 @@
 
         function startGame(mode) {
             initAudio(); loadData();
+
+            // DERECELİ KORUMASI (Anti-Hile)
             if(mode === 'ranked') {
                 if(settings.speed === 'slow' || settings.targetType === 'circle' || !settings.approach) {
                     alert("⚠️ DERECELİ GİRİŞİ REDDEDİLDİ!\n\nRekabetçi girebilmek için hile sayılabilecek ayarları kapatmalısın.\nŞu ayarları düzelt:\n- Hız 'Yavaş' Olamaz.\n- Hedef 'Sadece Klasik' Olamaz.\n- Halka Sistemi KAPALI Olamaz.\n\nLütfen Ayarlar'dan bunları düzeltip tekrar dene.");
@@ -639,16 +583,15 @@
                 else { spawnInterval = 950; approachRate = 1350; currentHitWindow = 240; }
             }
 
-            const tmrDisp = document.getElementById('timerDisplay'); if(tmrDisp) tmrDisp.style.display = (mode === 'endless' || mode === 'sudden_death') ? 'none' : 'block';
-            const hlthCont = document.getElementById('healthBarContainer'); if(hlthCont) hlthCont.style.display = (mode === 'endless' || mode === 'sudden_death') ? 'block' : 'none';
-            const rpRes = document.getElementById('rpResult'); if(rpRes) rpRes.style.display = 'none';
-            
+            document.getElementById('timerDisplay').style.display = (mode === 'endless' || mode === 'sudden_death') ? 'none' : 'block';
+            document.getElementById('healthBarContainer').style.display = (mode === 'endless' || mode === 'sudden_death') ? 'block' : 'none';
+            document.getElementById('rpResult').style.display = 'none';
             document.querySelectorAll('.screen').forEach(s => s.style.display='none');
-            const gmScr = document.getElementById('gameScreen'); if(gmScr) gmScr.style.display = 'block';
+            document.getElementById('gameScreen').style.display = 'block';
             
             resizeCanvas(); updateHUD();
             lastTickTime = lastSpawnTime = performance.now();
-            cancelAnimationFrame(gameLoop); gameLoop = requestAnimationFrame(render);
+            cancelAnimationFrame(gameLoop); requestAnimationFrame(render);
         }
 
         function endGame() {
@@ -656,17 +599,17 @@
             if (score > profile.highScore && currentMode !== 'frenzy') profile.highScore = score;
             let rpDiv = document.getElementById('rpResult');
             
-            if (currentMode === 'ranked' && rpDiv) {
+            if (currentMode === 'ranked') {
                 profile.matchesPlayed++; rpDiv.style.display = 'block';
                 if (profile.matchesPlayed <= 3) {
                     profile.totalPlacementScore += score;
                     if (profile.matchesPlayed === 3) {
                         profile.rp = (profile.totalPlacementScore / 3) / 90; updateRankLogic();
-                        let rInfo = RANKS.find(r=>r.id===profile.rankId) || RANKS[0];
+                        let rInfo = RANKS.find(r=>r.id===profile.rankId);
                         rpDiv.innerHTML = `Yerleştirme Tamamlandı!<br><span style="color:${rInfo.color}">${rInfo.name}</span> oldun!`;
                     } else { rpDiv.innerHTML = `Yerleştirme Maçı: ${profile.matchesPlayed}/3`; }
                 } else {
-                    let rInfo = RANKS.find(r=>r.id===profile.rankId) || RANKS[0];
+                    let rInfo = RANKS.find(r=>r.id===profile.rankId);
                     let expected = rInfo.reqScore || 40000;
                     let rpChange = score > expected * 1.2 ? 25 : score > expected ? 15 : score > expected * 0.8 ? 5 : score > expected * 0.5 ? -10 : -20;
                     
@@ -674,33 +617,26 @@
                     let oldRank = profile.rankId; updateRankLogic();
                     let color = rpChange >= 0 ? "#4ade80" : "#ef4444"; let sign = rpChange >= 0 ? "+" : "";
                     let text = `RP: <span style="color:${color}">${sign}${rpChange}</span> (Toplam: ${Math.round(profile.rp)})`;
-                    let newRInfo = RANKS.find(r=>r.id===profile.rankId) || RANKS[0];
-                    if(profile.rankId > oldRank) text += `<br><span style="color:#fbbf24">RÜTBE ATLADIN! ${newRInfo.name}</span>`;
-                    else if(profile.rankId < oldRank) text += `<br><span style="color:#ef4444">RÜTBE DÜŞTÜN! ${newRInfo.name}</span>`;
+                    if(profile.rankId > oldRank) text += `<br><span style="color:#fbbf24">RÜTBE ATLADIN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
+                    else if(profile.rankId < oldRank) text += `<br><span style="color:#ef4444">RÜTBE DÜŞTÜN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
                     rpDiv.innerHTML = text;
                 }
                 saveData();
             }
-            
-            const goTitle = document.getElementById('gameOverTitle'); if(goTitle) goTitle.innerText = currentMode === 'sudden_death' ? "Kaçırdın ve Öldün!" : currentMode === 'endless' ? "Tükendin!" : "Oyun Bitti!";
-            if(document.getElementById('finalScore')) document.getElementById('finalScore').innerText = score;
-            if(document.getElementById('stat300')) document.getElementById('stat300').innerText = stats.hit300;
-            if(document.getElementById('stat100')) document.getElementById('stat100').innerText = stats.hit100;
-            if(document.getElementById('stat50')) document.getElementById('stat50').innerText = stats.hit50;
-            if(document.getElementById('statMiss')) document.getElementById('statMiss').innerText = stats.miss;
-            if(document.getElementById('statMaxCombo')) document.getElementById('statMaxCombo').innerText = maxCombo + "x";
-            
-            if(document.getElementById('gameScreen')) document.getElementById('gameScreen').style.display = 'none';
-            if(document.getElementById('gameOverScreen')) document.getElementById('gameOverScreen').style.display = 'flex';
+            document.getElementById('gameOverTitle').innerText = currentMode === 'sudden_death' ? "Kaçırdın ve Öldün!" : currentMode === 'endless' ? "Tükendin!" : "Oyun Bitti!";
+            document.getElementById('finalScore').innerText = score;
+            document.getElementById('stat300').innerText = stats.hit300;
+            document.getElementById('stat100').innerText = stats.hit100;
+            document.getElementById('stat50').innerText = stats.hit50;
+            document.getElementById('statMiss').innerText = stats.miss;
+            document.getElementById('statMaxCombo').innerText = maxCombo + "x";
+            document.getElementById('gameScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'flex';
         }
 
-        function goToMenu() { 
-            updateMenuUI(); 
-            if(document.getElementById('gameOverScreen')) document.getElementById('gameOverScreen').style.display = 'none'; 
-            if(document.getElementById('menuScreen')) document.getElementById('menuScreen').style.display = 'flex'; 
-        }
-        
-        window.addEventListener('DOMContentLoaded', loadData);
+        function goToMenu() { updateMenuUI(); document.getElementById('gameOverScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'flex'; }
+        loadData();
     </script>
-    </body>
+</body>
 </html>
+
