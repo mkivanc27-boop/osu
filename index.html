@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Osu Faceİt</title>
+    <title>Web-Aim (Definitive Edition)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: white; overflow: hidden; transition: background-color 0.3s; }
         
+        /* Screens */
         .screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         #menuScreen { background: radial-gradient(circle, rgba(30,41,59,0.8) 0%, rgba(15,23,42,1) 100%); z-index: 20; }
         #settingsScreen { background: rgba(15,23,42,0.95); display: none; z-index: 30; }
         #gameScreen { display: none; cursor: none; }
         #gameOverScreen { background: rgba(15, 23, 42, 0.95); display: none; z-index: 30; }
 
+        /* Typography */
         h1 { font-size: 4rem; color: #d946ef; text-shadow: 0 0 20px rgba(217, 70, 239, 0.5); margin-bottom: 0.5rem; text-align: center; font-weight: 900; letter-spacing: 2px; }
         h2 { font-size: 2.5rem; margin-bottom: 1rem; color: #f8fafc; text-align: center; }
         
-        .btn { background: #c026d3; color: white; border: none; padding: 12px 30px; font-size: 1.1rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 8px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        /* Buttons */
+        .btn { background: #c026d3; color: white; border: none; padding: 15px 40px; font-size: 1.3rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 10px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
         .btn:hover { background: #d946ef; transform: translateY(-3px) scale(1.02); box-shadow: 0 0 20px #d946ef; }
         .btn-ranked { background: #ef4444; } .btn-ranked:hover { background: #f87171; box-shadow: 0 0 20px #ef4444; }
         .btn-endless { background: #10b981; } .btn-endless:hover { background: #34d399; box-shadow: 0 0 20px #10b981; }
-        .btn-fun { background: #f59e0b; } .btn-fun:hover { background: #fbbf24; box-shadow: 0 0 20px #f59e0b; }
         .btn-secondary { background: #475569; } .btn-secondary:hover { background: #64748b; box-shadow: 0 0 15px #64748b; }
 
-        .profile-box { background: rgba(30, 41, 59, 0.8); border: 2px solid #334155; padding: 15px 30px; border-radius: 12px; margin-bottom: 20px; text-align: center; min-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
+        /* Profile Box */
+        .profile-box { background: rgba(30, 41, 59, 0.8); border: 2px solid #334155; padding: 15px 30px; border-radius: 12px; margin-bottom: 30px; text-align: center; min-width: 300px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); }
         .profile-name { font-size: 1.5rem; font-weight: bold; color: #fff; margin-bottom: 5px; }
         .profile-rank { font-size: 2rem; font-weight: 900; margin-bottom: 5px; text-shadow: 0 0 10px currentColor; }
         .profile-rp { font-size: 1.1rem; color: #94a3b8; }
         .profile-stats { font-size: 0.9rem; color: #64748b; margin-top: 10px; border-top: 1px solid #334155; padding-top: 10px; }
 
+        /* Settings Menu Tabs */
         .settings-container { background: #1e293b; padding: 25px; border-radius: 15px; border: 2px solid #334155; width: 650px; max-width: 95%; max-height: 75vh; overflow-y: auto; display: flex; flex-direction: column; }
         .tabs { display: flex; border-bottom: 2px solid #334155; margin-bottom: 20px; }
         .tab { flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; color: #94a3b8; transition: 0.2s; }
@@ -43,6 +47,7 @@
         input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 5px; cursor: pointer; background: transparent; }
         input[type="checkbox"] { width: 20px; height: 20px; accent-color: #d946ef; cursor: pointer; }
 
+        /* Game HUD */
         #hud { position: absolute; top: 15px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; z-index: 5; text-shadow: 2px 2px 4px #000; }
         #scoreDisplay { font-size: 2.5rem; color: #fff; font-weight: 900; line-height: 1; margin-bottom: 5px; }
         #timerDisplay { font-size: 1.8rem; color: #fbbf24; font-weight: bold; }
@@ -61,15 +66,15 @@
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; background: rgba(30,41,59,0.8); padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: left; font-size: 1.2rem; border: 1px solid #334155; width: 100%; max-width: 500px;}
         .stat-item span { font-weight: bold; float: right; }
         #rpResult { font-size: 2rem; font-weight: bold; text-align: center; margin-top: 15px; padding: 10px; border-radius: 8px; display: none; }
-        .menu-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; justify-content: center;}
     </style>
 </head>
 <body>
 
     <div id="flashOverlay"></div>
 
+    <!-- MAIN MENU -->
     <div id="menuScreen" class="screen">
-        <h1>OSU FACEİT</h1>
+        <h1>KOZMİK AİM</h1>
         
         <div class="profile-box">
             <div class="profile-name" id="menuName">Oyuncu</div>
@@ -78,47 +83,43 @@
             <div class="profile-stats">Oynanan Dereceli: <span id="menuMatches">0</span> | Max Skor: <span id="menuHighScore">0</span></div>
         </div>
 
-        <div class="menu-row">
-            <button class="btn btn-ranked" onclick="startGame('ranked')">🏆 Dereceli (60s)</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <button class="btn btn-ranked" onclick="startGame('ranked')">🏆 Dereceli Oyna (60s)</button>
             <button class="btn" onclick="startGame('normal')">🎯 Antrenman (60s)</button>
-            <button class="btn btn-endless" onclick="startGame('endless')">♾️ Sınırsız Mod</button>
         </div>
-        <div class="menu-row" style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 10px; border: 1px solid #334155;">
-            <button class="btn btn-fun" onclick="startGame('sudden_death')">💀 Ani Ölüm</button>
-            <button class="btn btn-fun" onclick="startGame('frenzy')">🌪️ Kaos</button>
-            <button class="btn btn-secondary" onclick="openSettings()">⚙️ Ayarlar</button>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-endless" onclick="startGame('endless')">♾️ Sınırsız Mod</button>
+            <button class="btn btn-secondary" onclick="openSettings()">⚙️ Özelleştir</button>
         </div>
     </div>
 
+    <!-- SETTINGS / CUSTOMIZATION -->
     <div id="settingsScreen" class="screen">
-        <h2>Ayarlar</h2>
+        <h2>Özelleştirme & Ayarlar</h2>
         <div class="settings-container">
             <div class="tabs">
-                <div class="tab active" onclick="switchTab(event, 'tabGame')">Oyun Modu</div>
-                <div class="tab" onclick="switchTab(event, 'tabVisual')">Görsel</div>
-                <div class="tab" onclick="switchTab(event, 'tabProfile')">Profil</div>
+                <div class="tab active" onclick="switchTab('tabGame')">Oyun Modu</div>
+                <div class="tab" onclick="switchTab('tabVisual')">Renkler & Görsel</div>
+                <div class="tab" onclick="switchTab('tabProfile')">Profil & Kozmetik</div>
             </div>
 
+            <!-- Tab 1: Gameplay -->
             <div id="tabGame" class="tab-content active">
                 <div class="setting-row">
                     <label>Antrenman Hedef Tipi:</label>
                     <select id="setTargetType">
-                        <option value="mixed">Karışık (Önerilen)</option>
-                        <option value="circle">Sadece Klasik (Kaydırmasız)</option>
-                        <option value="slider">Sadece Slider</option>
+                        <option value="circle">Klasik (Sabit)</option>
+                        <option value="slider">Slider (Hareketli)</option>
+                        <option value="mixed">Karışık</option>
                     </select>
                 </div>
                 <div class="setting-row">
-                    <label>Oyun Hızı (Antrenman):</label>
+                    <label>Oyun Hızı:</label>
                     <select id="setSpeed">
-                        <option value="normal">Normal (Dengeli)</option>
-                        <option value="slow">Yavaş (Rahat)</option>
-                        <option value="fast">Hızlı (Zorlu)</option>
+                        <option value="slow">Yavaş</option>
+                        <option value="normal">Normal</option>
+                        <option value="fast">Hızlı</option>
                     </select>
-                </div>
-                <div class="setting-row">
-                    <label>Halka Sistemi (Yaklaşma):</label>
-                    <input type="checkbox" id="setApproach">
                 </div>
                 <div class="setting-row">
                     <label>Ekran Sarsıntısı:</label>
@@ -130,49 +131,81 @@
                 </div>
             </div>
 
+            <!-- Tab 2: Visuals -->
             <div id="tabVisual" class="tab-content">
-                <div class="setting-row"><label>Arka Plan:</label><input type="color" id="colorBg"></div>
-                <div class="setting-row"><label>Hedef (İç):</label><input type="color" id="colorTargetInner"></div>
-                <div class="setting-row"><label>Hedef (Dış):</label><input type="color" id="colorTargetOuter"></div>
-                <div class="setting-row"><label>Hedef Boyutu:</label><input type="range" id="sizeTarget" min="0.6" max="1.6" step="0.1"></div>
-                <div class="setting-row"><label>Crosshair Rengi:</label><input type="color" id="colorCrosshair"></div>
-                <div class="setting-row"><label>Crosshair Boyutu:</label><input type="range" id="sizeCrosshair" min="2" max="15" step="1"></div>
+                <div class="setting-row">
+                    <label>Arka Plan Rengi:</label>
+                    <input type="color" id="colorBg">
+                </div>
+                <div class="setting-row">
+                    <label>Hedef Rengi (İç):</label>
+                    <input type="color" id="colorTargetInner">
+                </div>
+                <div class="setting-row">
+                    <label>Hedef Çerçevesi (Dış):</label>
+                    <input type="color" id="colorTargetOuter">
+                </div>
+                <div class="setting-row">
+                    <label>Hedef Boyutu Çarpanı:</label>
+                    <input type="range" id="sizeTarget" min="0.5" max="1.5" step="0.1">
+                </div>
+                <div class="setting-row">
+                    <label>Crosshair Rengi:</label>
+                    <input type="color" id="colorCrosshair">
+                </div>
+                <div class="setting-row">
+                    <label>Crosshair Boyutu:</label>
+                    <input type="range" id="sizeCrosshair" min="2" max="15" step="1">
+                </div>
             </div>
 
+            <!-- Tab 3: Profile & Cosmetics -->
             <div id="tabProfile" class="tab-content">
-                <div class="setting-row"><label>Oyuncu Adı:</label><input type="text" id="setProfileName" maxlength="15" placeholder="Adınızı girin..."></div>
+                <div class="setting-row">
+                    <label>Oyuncu Adı:</label>
+                    <input type="text" id="setProfileName" maxlength="15" placeholder="Adınızı girin...">
+                </div>
                 <div class="setting-row">
                     <label>Fare İzi (Trail):</label>
                     <select id="setTrailType">
                         <option value="none">Kapalı</option>
-                        <option value="standard">Standart</option>
-                        <option value="neon" id="optNeon" disabled>Neon (Altın Göz+)</option>
-                        <option value="stardust" id="optStardust" disabled>Yıldız Tozu (Elmas+)</option>
-                        <option value="cosmic" id="optCosmic" disabled>Kozmik (OSU FACEİT)</option>
+                        <option value="standard">Standart Çizgi (Herkes)</option>
+                        <option value="neon" id="optNeon" disabled>Neon Parlaması (Altın Göz+)</option>
+                        <option value="stardust" id="optStardust" disabled>Yıldız Tozu (Elmas Refleks+)</option>
+                        <option value="cosmic" id="optCosmic" disabled>Kozmik Alev (KOZMİK AİM)</option>
                     </select>
                 </div>
-                <div class="setting-row"><label>Trail Rengi:</label><input type="color" id="colorTrail"></div>
+                <div class="setting-row">
+                    <label>Trail Rengi (Sadece Standart):</label>
+                    <input type="color" id="colorTrail">
+                </div>
             </div>
         </div>
         <br>
         <button class="btn btn-secondary" onclick="saveAndCloseSettings()">Kaydet & Geri Dön</button>
     </div>
 
+    <!-- GAMEPLAY -->
     <div id="gameScreen" class="screen" style="background: transparent;">
         <div id="healthBarContainer"><div id="healthBar"></div></div>
         <div id="hud">
             <div id="scoreDisplay">0</div>
             <div id="timerDisplay">60.0</div>
-            <div class="hud-sub-row"><span id="accDisplay">100%</span></div>
+            <div class="hud-sub-row">
+                <span id="accDisplay">100%</span>
+            </div>
         </div>
         <div id="comboContainer"><div id="comboDisplay">0x</div></div>
         <canvas id="gameCanvas"></canvas>
     </div>
 
+    <!-- GAME OVER -->
     <div id="gameOverScreen" class="screen">
         <h2 id="gameOverTitle">Oyun Bitti!</h2>
         <h1 id="finalScore" style="color: #fff; margin-bottom: 10px;">0</h1>
+        
         <div id="rpResult"></div>
+
         <div class="stats-grid">
             <div class="stat-item">Kusursuz (300): <span id="stat300" style="color: #38bdf8;">0</span></div>
             <div class="stat-item">İyi (100): <span id="stat100" style="color: #4ade80;">0</span></div>
@@ -181,21 +214,25 @@
             <div class="stat-item" style="grid-column: span 2; text-align: center;">Maksimum Kombo: <span id="statMaxCombo" style="float: none; color: #d946ef;">0</span></div>
         </div>
         <button class="btn" onclick="goToMenu()">Ana Menüye Dön</button>
-                                                                                </div>
-        <script>
+    </div>
+
+    <script>
+        // --- CONSTANTS & RANKS ---
         const RANKS = [
             { id: 0, name: "Yerleştirme", minRP: -9999, color: "#64748b" },
-            { id: 1, name: "Çaylak", minRP: 0, color: "#94a3b8", reqScore: 15000 },
-            { id: 2, name: "Gümüş Hedef", minRP: 200, color: "#cbd5e1", reqScore: 30000 },
-            { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 55000 },
-            { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 80000 },
-            { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 110000 },
-            { id: 6, name: "OSU FACEİT", minRP: 1600, color: "#ef4444", reqScore: 160000 }
+            { id: 1, name: "Çaylak", minRP: 0, color: "#94a3b8", reqScore: 20000 },
+            { id: 2, name: "Gümüş Hedef", minRP: 200, color: "#cbd5e1", reqScore: 40000 },
+            { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 70000 },
+            { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 100000 },
+            { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 150000 },
+            { id: 6, name: "KOZMİK AİM", minRP: 1600, color: "#ef4444", reqScore: 220000 }
         ];
 
+        // --- GLOBAL STATE ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        let audioCtx, gameLoop, isPlaying = false, currentMode = '';
+        let audioCtx;
+        let gameLoop, isPlaying = false, currentMode = '';
         let score = 0, combo = 0, maxCombo = 0, health = 100, timeLeft = 60;
         let stats = { hit300: 0, hit100: 0, hit50: 0, miss: 0 };
         let targets = [], floatingTexts = [], mouseTrail = [], particles = [];
@@ -203,22 +240,35 @@
         let screenShake = 0, currentMouseX = window.innerWidth/2, currentMouseY = window.innerHeight/2;
         let isHolding = false;
 
-        let profile = { name: "Oyuncu", rp: 0, matchesPlayed: 0, totalPlacementScore: 0, highScore: 0, rankId: 0 };
-        let settings = {
-            targetType: "mixed", speed: "normal", approach: true, shake: true, hitText: true,
-            bg: "#0f172a", targetInner: "#c026d3", targetOuter: "#1e293b", targetSize: 1.0,
-            crosshairColor: "#ffffff", crosshairSize: 6, trailType: "standard", trailColor: "#38bdf8"
+        // --- USER DATA & SETTINGS ---
+        let profile = {
+            name: "Oyuncu",
+            rp: 0,
+            matchesPlayed: 0,
+            totalPlacementScore: 0,
+            highScore: 0,
+            rankId: 0
         };
 
-        let spawnInterval = 900, approachRate = 1300, currentHitWindow = 220, baseRadius = 45;
+        let settings = {
+            targetType: "mixed", speed: "normal", shake: true, hitText: true,
+            bg: "#0f172a", targetInner: "#c026d3", targetOuter: "#1e293b",
+            targetSize: 1.0, crosshairColor: "#ffffff", crosshairSize: 6,
+            trailType: "standard", trailColor: "#38bdf8"
+        };
 
+        // Base game variables
+        let spawnInterval = 700, approachRate = 1200, hitWindow = 150, baseRadius = 45;
+
+        // --- INIT & STORAGE ---
         function loadData() {
             let savedProf = localStorage.getItem('kozmikProfile');
             let savedSet = localStorage.getItem('kozmikSettings');
             if(savedProf) profile = {...profile, ...JSON.parse(savedProf)};
             if(savedSet) settings = {...settings, ...JSON.parse(savedSet)};
-            if(settings.approach === undefined) settings.approach = true;
-            updateRankLogic(); applySettingsToUI(); updateMenuUI();
+            updateRankLogic();
+            applySettingsToUI();
+            updateMenuUI();
         }
 
         function saveData() {
@@ -227,11 +277,15 @@
         }
 
         function updateRankLogic() {
-            if (profile.matchesPlayed < 3) profile.rankId = 0;
-            else {
-                let currentRank = RANKS[1];
+            if (profile.matchesPlayed < 3) {
+                profile.rankId = 0; // Yerleştirme
+            } else {
+                let currentRank = RANKS[1]; // default Çaylak
                 for (let i = RANKS.length - 1; i >= 1; i--) {
-                    if (profile.rp >= RANKS[i].minRP) { currentRank = RANKS[i]; break; }
+                    if (profile.rp >= RANKS[i].minRP) {
+                        currentRank = RANKS[i];
+                        break;
+                    }
                 }
                 profile.rankId = currentRank.id;
             }
@@ -240,42 +294,56 @@
         function updateMenuUI() {
             document.getElementById('menuName').innerText = profile.name;
             const rInfo = RANKS.find(r => r.id === profile.rankId);
-            document.getElementById('menuRank').innerText = profile.rankId === 0 ? `Yerleştirme (${profile.matchesPlayed}/3)` : rInfo.name;
+            
+            let rankText = rInfo.name;
+            if (profile.rankId === 0) rankText = `Yerleştirme (${profile.matchesPlayed}/3)`;
+            
+            document.getElementById('menuRank').innerText = rankText;
             document.getElementById('menuRank').style.color = rInfo.color;
-            document.getElementById('menuRP').innerText = profile.rankId === 0 ? "Bilinmiyor" : `RP: ${Math.round(profile.rp)}`;
+            document.getElementById('menuRP').innerText = profile.rankId === 0 ? "Bilinmiyor" : `Derece Puanı (RP): ${Math.round(profile.rp)}`;
             document.getElementById('menuMatches').innerText = profile.matchesPlayed;
             document.getElementById('menuHighScore').innerText = profile.highScore;
+            
             document.body.style.backgroundColor = settings.bg;
 
+            // Unlock cosmetics logic
             document.getElementById('optNeon').disabled = profile.rankId < 3; 
             document.getElementById('optStardust').disabled = profile.rankId < 4; 
             document.getElementById('optCosmic').disabled = profile.rankId < 6; 
+
+            // If selected locked, revert
             if(settings.trailType === "neon" && profile.rankId < 3) settings.trailType = "standard";
             if(settings.trailType === "stardust" && profile.rankId < 4) settings.trailType = "standard";
             if(settings.trailType === "cosmic" && profile.rankId < 6) settings.trailType = "standard";
         }
 
-        function switchTab(e, tabId) {
+        // --- SETTINGS UI ---
+        function switchTab(tabId) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            e.currentTarget.classList.add('active');
+            event.target.classList.add('active');
             document.getElementById(tabId).classList.add('active');
         }
 
-        function openSettings() { applySettingsToUI(); document.getElementById('menuScreen').style.display = 'none'; document.getElementById('settingsScreen').style.display = 'flex'; }
+        function openSettings() {
+            applySettingsToUI();
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('settingsScreen').style.display = 'flex';
+        }
 
         function applySettingsToUI() {
             document.getElementById('setTargetType').value = settings.targetType;
             document.getElementById('setSpeed').value = settings.speed;
-            document.getElementById('setApproach').checked = settings.approach;
             document.getElementById('setShake').checked = settings.shake;
             document.getElementById('setHitText').checked = settings.hitText;
+            
             document.getElementById('colorBg').value = settings.bg;
             document.getElementById('colorTargetInner').value = settings.targetInner;
             document.getElementById('colorTargetOuter').value = settings.targetOuter;
             document.getElementById('sizeTarget').value = settings.targetSize;
             document.getElementById('colorCrosshair').value = settings.crosshairColor;
             document.getElementById('sizeCrosshair').value = settings.crosshairSize;
+            
             document.getElementById('setProfileName').value = profile.name;
             document.getElementById('setTrailType').value = settings.trailType;
             document.getElementById('colorTrail').value = settings.trailColor;
@@ -284,26 +352,31 @@
         function saveAndCloseSettings() {
             settings.targetType = document.getElementById('setTargetType').value;
             settings.speed = document.getElementById('setSpeed').value;
-            settings.approach = document.getElementById('setApproach').checked;
             settings.shake = document.getElementById('setShake').checked;
             settings.hitText = document.getElementById('setHitText').checked;
+            
             settings.bg = document.getElementById('colorBg').value;
             settings.targetInner = document.getElementById('colorTargetInner').value;
-            settings.targetOuter = document.getElementById('colorTargetOuter').value;
+                        settings.targetOuter = document.getElementById('colorTargetOuter').value;
             settings.targetSize = parseFloat(document.getElementById('sizeTarget').value);
             settings.crosshairColor = document.getElementById('colorCrosshair').value;
             settings.crosshairSize = parseInt(document.getElementById('sizeCrosshair').value);
+            
             profile.name = document.getElementById('setProfileName').value || "Oyuncu";
             settings.trailType = document.getElementById('setTrailType').value;
             settings.trailColor = document.getElementById('colorTrail').value;
-            saveData(); updateMenuUI();
+            
+            saveData();
+            updateMenuUI();
             document.getElementById('settingsScreen').style.display = 'none';
             document.getElementById('menuScreen').style.display = 'flex';
         }
 
+        // --- GAME CLASSES ---
         class Particle {
             constructor(x, y, color, type="normal") {
-                this.x = x; this.y = y; this.color = color; this.type = type;
+                this.x = x; this.y = y; this.color = color;
+                this.type = type;
                 this.size = type === "stardust" ? Math.random()*2+1 : Math.random() * 4 + 2;
                 this.speedX = (Math.random() - 0.5) * (type === "cosmic" ? 12 : 8);
                 this.speedY = (Math.random() - 0.5) * (type === "cosmic" ? 12 : 8);
@@ -313,14 +386,18 @@
             draw(ctx) {
                 ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
                 ctx.fillStyle = this.color;
-                if(this.type === "stardust") { ctx.shadowBlur = 10; ctx.shadowColor = this.color; }
+                if(this.type === "stardust") {
+                    ctx.shadowBlur = 10; ctx.shadowColor = this.color;
+                }
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill(); ctx.restore();
             }
         }
 
         class FloatingText {
-            constructor(x, y, text, color) { this.x = x; this.y = y; this.text = text; this.color = color; this.life = 1.0; }
+            constructor(x, y, text, color) {
+                this.x = x; this.y = y; this.text = text; this.color = color; this.life = 1.0;
+            }
             draw(ctx) {
                 this.y -= 1.5; this.life -= 0.04;
                 ctx.save(); ctx.globalAlpha = Math.max(0, this.life);
@@ -329,7 +406,8 @@
                 ctx.fillText(this.text, this.x, this.y); ctx.restore();
             }
         }
-                    class Target {
+
+        class Target {
             constructor(x, y, time, isSlider) {
                 this.x = x; this.y = y; this.spawnTime = time; this.active = true;
                 this.type = isSlider ? 'slider' : 'circle';
@@ -347,21 +425,20 @@
                 let age = time - this.spawnTime;
                 
                 if (this.type === 'circle' || (this.type === 'slider' && this.state === 'waiting')) {
-                    if(!settings.approach) {
-                        this.apprRadius = this.radius; // Halka yok, süresiz
-                    } else {
-                        this.apprRadius = (this.radius * 3.5) - ((this.radius * 2.5) * (age / approachRate));
-                        if (this.apprRadius < this.radius) this.apprRadius = this.radius;
-                        if (age > approachRate + currentHitWindow) { this.active = false; registerMiss(this.x, this.y); }
+                    this.apprRadius = (this.radius * 3.5) - ((this.radius * 2.5) * (age / approachRate));
+                    if (this.apprRadius < this.radius) this.apprRadius = this.radius;
+                    
+                    if (age > approachRate + hitWindow) {
+                        this.active = false; registerMiss(this.x, this.y);
                     }
                 } else if (this.type === 'slider' && this.state === 'active') {
-                    let prog = (time - this.hitTime) / 700; 
+                    let prog = (time - this.hitTime) / 600; // slider duration
                     if (prog >= 1) {
                         this.active = false; registerHit(300, this.endX, this.endY, true);
                     } else {
                         this.ballX = this.x + (this.endX - this.x) * prog;
                         this.ballY = this.y + (this.endY - this.y) * prog;
-                        if (!isHolding || Math.hypot(currentMouseX - this.ballX, currentMouseY - this.ballY) > this.radius * 2.6) {
+                        if (!isHolding || Math.hypot(currentMouseX - this.ballX, currentMouseY - this.ballY) > this.radius * 2.5) {
                             this.active = false; registerMiss(this.ballX, this.ballY);
                         }
                     }
@@ -374,6 +451,7 @@
                     ctx.beginPath(); ctx.moveTo(this.x, this.y); ctx.lineTo(this.endX, this.endY);
                     ctx.lineWidth = this.radius * 1.8; ctx.strokeStyle = settings.targetOuter; ctx.lineCap = 'round'; ctx.stroke();
                     ctx.lineWidth = this.radius * 1.8 + 4; ctx.strokeStyle = `${settings.targetInner}44`; ctx.stroke();
+                    
                     ctx.beginPath(); ctx.arc(this.endX, this.endY, this.radius, 0, Math.PI*2);
                     ctx.fillStyle = settings.bg; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = settings.targetInner; ctx.stroke();
                 }
@@ -381,14 +459,14 @@
                 if (this.type === 'circle' || this.state === 'waiting') {
                     ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                     ctx.fillStyle = settings.targetOuter; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = settings.targetInner; ctx.stroke();
+                    
                     ctx.beginPath(); ctx.arc(this.x, this.y, this.radius * 0.3, 0, Math.PI * 2);
                     ctx.fillStyle = settings.targetInner; ctx.fill();
                     
-                    if(settings.approach) {
-                        ctx.beginPath(); ctx.arc(this.x, this.y, this.apprRadius, 0, Math.PI * 2); 
-                        ctx.lineWidth = 3; let opacity = Math.max(0, 1 - (this.apprRadius - this.radius) / (this.radius * 2));
-                        ctx.strokeStyle = `rgba(255,255,255,${opacity})`; ctx.stroke();
-                    }
+                    ctx.beginPath(); ctx.arc(this.x, this.y, this.apprRadius, 0, Math.PI * 2); 
+                    ctx.lineWidth = 3;
+                    let opacity = Math.max(0, 1 - (this.apprRadius - this.radius) / (this.radius * 2));
+                    ctx.strokeStyle = `rgba(255,255,255,${opacity})`; ctx.stroke();
                 } else if (this.state === 'active') {
                     ctx.beginPath(); ctx.arc(this.ballX, this.ballY, this.radius * 1.5, 0, Math.PI * 2);
                     ctx.fillStyle = `${settings.targetInner}66`; ctx.fill(); ctx.strokeStyle = settings.targetInner; ctx.lineWidth = 3; ctx.stroke();
@@ -397,6 +475,7 @@
             }
         }
 
+        // --- GAME LOGIC ---
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -406,11 +485,13 @@
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
+            
             if (type === 300) { osc.frequency.value = 880; osc.type = 'sine'; }
             else if (type === 100) { osc.frequency.value = 587; osc.type = 'sine'; }
             else if (type === 50) { osc.frequency.value = 440; osc.type = 'sine'; }
             else if (type === 'miss') { osc.frequency.value = 150; osc.type = 'sawtooth'; }
-            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
             osc.start(); osc.stop(audioCtx.currentTime + 0.15);
         }
@@ -418,30 +499,39 @@
         function registerMiss(x, y) {
             playSound('miss'); combo = 0; stats.miss++;
             if(settings.hitText) floatingTexts.push(new FloatingText(x, y, "X", "#e11d48"));
-            if(settings.shake) screenShake = 6;
+            if(settings.shake) screenShake = 8;
             let flash = document.getElementById('flashOverlay');
             flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 80);
             
-            if (currentMode === 'endless') { health -= 8; if(health <= 0) endGame(); }
-            if (currentMode === 'sudden_death') { health = 0; endGame(); }
+            if (currentMode === 'endless') {
+                health -= 10; updateHUD();
+                if(health <= 0) endGame();
+            }
             updateHUD();
         }
 
         function registerHit(pts, x, y, isSliderEnd=false) {
-            score += pts + (combo * (currentMode === 'ranked' ? 12 : 8)); 
+            score += pts + (combo * (currentMode === 'ranked' ? 15 : 10)); 
             combo++; if(combo > maxCombo) maxCombo = combo;
+            
             if(pts === 300) stats.hit300++; else if(pts===100) stats.hit100++; else stats.hit50++;
-            if(currentMode === 'endless') health = Math.min(100, health + 3);
+            if(currentMode === 'endless') health = Math.min(100, health + 2);
+            
             playSound(pts);
             if(settings.hitText && !isSliderEnd) {
                 let color = pts===300 ? "#38bdf8" : pts===100 ? "#4ade80" : "#fbbf24";
                 floatingTexts.push(new FloatingText(x, y, pts, color));
             }
-            let pColor = pts===300 ? settings.targetInner : "#fff"; let pType = "normal";
+            
+            // Particles based on Trail/Cosmetic setting
+            let pColor = pts===300 ? settings.targetInner : "#fff";
+            let pType = "normal";
             if(settings.trailType === "stardust") { pColor = "#fcd34d"; pType = "stardust"; }
             if(settings.trailType === "cosmic") { pColor = "#ef4444"; pType = "cosmic"; }
-            for(let i=0; i<(pts===300?8:4); i++) particles.push(new Particle(x, y, pColor, pType));
-            if(settings.shake && pts===300) screenShake = 2;
+            
+            for(let i=0; i<(pts===300?10:5); i++) particles.push(new Particle(x, y, pColor, pType));
+            
+            if(settings.shake && pts===300) screenShake = 3;
             updateHUD();
         }
 
@@ -450,26 +540,28 @@
             let tnow = performance.now();
             for (let i = 0; i < targets.length; i++) {
                 let t = targets[i]; if(t.active === false || t.state === 'active') continue;
-                if (Math.hypot(currentMouseX - t.x, currentMouseY - t.y) < t.radius * 1.6) {
+                
+                if (Math.hypot(currentMouseX - t.x, currentMouseY - t.y) < t.radius * 1.5) {
+                    let diff = Math.abs(approachRate - (tnow - t.spawnTime));
                     let pts = 0;
-                    if(!settings.approach) { pts = 300; } 
-                    else {
-                        let diff = Math.abs(approachRate - (tnow - t.spawnTime));
-                        if(diff <= currentHitWindow * 0.4) pts = 300; 
-                        else if(diff <= currentHitWindow * 0.75) pts = 100; 
-                        else if(diff <= currentHitWindow) pts = 50;
-                    }
+                    if(diff <= 70) pts = 300; else if(diff <= 140) pts = 100; else if(diff <= hitWindow) pts = 50;
+                    
                     if (pts > 0) {
-                        if (t.type === 'slider') { t.state = 'active'; t.hitTime = tnow; playSound(100); } 
-                        else { t.active = false; registerHit(pts, t.x, t.y); }
-                    } else { t.active = false; registerMiss(t.x, t.y); }
+                        if (t.type === 'slider') {
+                            t.state = 'active'; t.hitTime = tnow; playSound(100);
+                        } else {
+                            t.active = false; registerHit(pts, t.x, t.y);
+                        }
+                    } else {
+                        t.active = false; registerMiss(t.x, t.y);
+                    }
                     break;
                 }
             }
         }
 
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        window.addEventListener('resize', resizeCanvas);
+        // --- INPUTS ---
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
         
         function trackMouse(e) {
             if(!isPlaying) return;
@@ -480,6 +572,7 @@
             }
         }
         document.addEventListener('mousemove', trackMouse);
+        
         document.addEventListener('mousedown', (e) => { e.preventDefault(); initAudio(); isHolding=true; trackMouse(e); attemptHit(); });
         document.addEventListener('mouseup', () => isHolding=false);
         document.addEventListener('keydown', (e) => {
@@ -489,14 +582,17 @@
         });
         document.addEventListener('keyup', (e) => { let k = e.key.toLowerCase(); if(k==='z' || k==='x') isHolding=false; });
 
+        // --- RENDER LOOP ---
         function updateHUD() {
             document.getElementById('scoreDisplay').innerText = score;
             document.getElementById('comboDisplay').innerText = combo + "x";
-            document.getElementById('comboDisplay').style.color = combo > 40 ? "#c026d3" : combo > 15 ? "#fbbf24" : "#38bdf8";
+            document.getElementById('comboDisplay').style.color = combo > 50 ? "#c026d3" : combo > 20 ? "#fbbf24" : "#38bdf8";
+            
             let total = stats.hit300 + stats.hit100 + stats.hit50 + stats.miss;
             let acc = total > 0 ? Math.round(((stats.hit300 + stats.hit100*0.66 + stats.hit50*0.33) / total)*100) : 100;
             document.getElementById('accDisplay').innerText = acc + "%";
-            if(currentMode === 'endless' || currentMode === 'sudden_death') {
+            
+            if(currentMode === 'endless') {
                 document.getElementById('healthBar').style.width = health + "%";
                 document.getElementById('healthBar').style.background = health > 50 ? "#10b981" : health > 20 ? "#fbbf24" : "#ef4444";
             }
@@ -506,86 +602,90 @@
             if(!isPlaying) return;
             let dt = time - lastTickTime; lastTickTime = time;
             
-            if(currentMode === 'ranked' || currentMode === 'normal' || currentMode === 'frenzy') {
+            // Timer logic for 60s modes
+            if(currentMode !== 'endless') {
                 timeLeft -= dt/1000;
                 document.getElementById('timerDisplay').innerText = Math.max(0, timeLeft).toFixed(1);
                 if(timeLeft <= 0) { endGame(); return; }
             }
 
-            ctx.save(); ctx.fillStyle = settings.bg; ctx.fillRect(0,0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.fillStyle = settings.bg; ctx.fillRect(0,0, canvas.width, canvas.height);
+            
             if (screenShake > 0) { ctx.translate((Math.random()-.5)*screenShake, (Math.random()-.5)*screenShake); screenShake--; }
 
-            let limit = !settings.approach ? 15 : 99; // Çok fazla süresiz top birikmesini engeller
-            if (time - lastSpawnTime > spawnInterval && targets.length < limit) {
+            // Spawner
+            if (time - lastSpawnTime > spawnInterval) {
                 let m = 150, x = m + Math.random()*(canvas.width-m*2), y = m + Math.random()*(canvas.height-m*2);
                 let isSlider = false;
                 if(settings.targetType === 'slider') isSlider = true;
-                if(settings.targetType === 'mixed' && Math.random() < 0.25) isSlider = true;
-                if(currentMode === 'ranked' && Math.random() < 0.35) isSlider = true;
-                if(currentMode === 'frenzy') isSlider = false; // Kaos modunda slider olmaz
+                if(settings.targetType === 'mixed' && Math.random() < 0.3) isSlider = true;
+                if(currentMode === 'ranked' && Math.random() < 0.4) isSlider = true; // Ranked has forced sliders
                 
-                targets.push(new Target(x, y, time, isSlider)); lastSpawnTime = time;
+                targets.push(new Target(x, y, time, isSlider));
+                lastSpawnTime = time;
             }
 
+            // Trails
             if (settings.trailType !== "none" && mouseTrail.length > 1) {
                 ctx.beginPath(); ctx.moveTo(mouseTrail[0].x, mouseTrail[0].y);
-                for(let i=1; i<mouseTrail.length; i++) { ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y); mouseTrail[i].life -= 0.05; }
+                for(let i=1; i<mouseTrail.length; i++) {
+                    ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y);
+                    mouseTrail[i].life -= 0.05;
+                }
                 ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = settings.trailType === "neon" ? 8 : 4;
+                
                 let tColor = settings.trailColor;
                 if(settings.trailType === "neon") { ctx.shadowBlur=15; ctx.shadowColor="#d946ef"; tColor="#d946ef"; }
                 if(settings.trailType === "stardust") tColor = "#fbbf24";
                 if(settings.trailType === "cosmic") { ctx.shadowBlur=20; ctx.shadowColor="#ef4444"; tColor="#ef4444"; }
+                
                 ctx.strokeStyle = tColor; ctx.globalAlpha = mouseTrail[mouseTrail.length-1].life;
                 ctx.stroke(); ctx.globalAlpha = 1; ctx.shadowBlur = 0;
                 mouseTrail = mouseTrail.filter(t => t.life > 0);
             }
 
-            particles.forEach(p => { p.update(); p.draw(ctx); }); particles = particles.filter(p => p.alpha > 0);
+            // Draw objects
+            particles.forEach(p => { p.update(); p.draw(ctx); });
+            particles = particles.filter(p => p.alpha > 0);
             
-            // SLIDER DENGESİZLİĞİ ÇÖZÜMÜ: Aktif slider varken diğer topların süresi duraklıyor
-            let sliderActive = targets.some(t => t.type === 'slider' && t.state === 'active');
-            targets.forEach(t => { 
-                if(sliderActive && t.state !== 'active') t.spawnTime += dt; 
-                t.update(time); t.draw(ctx, time); 
-            }); 
+            targets.forEach(t => { t.update(time); t.draw(ctx, time); });
             targets = targets.filter(t => t.active);
             
-            floatingTexts.forEach(ft => ft.draw(ctx)); floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+            floatingTexts.forEach(ft => ft.draw(ctx));
+            floatingTexts = floatingTexts.filter(ft => ft.life > 0);
 
-            ctx.beginPath(); ctx.arc(currentMouseX, currentMouseY, isHolding ? settings.crosshairSize * 0.7 : settings.crosshairSize, 0, Math.PI*2);
+            // Crosshair
+            ctx.beginPath();
+            ctx.arc(currentMouseX, currentMouseY, isHolding ? settings.crosshairSize * 0.7 : settings.crosshairSize, 0, Math.PI*2);
             ctx.fillStyle = isHolding ? "#ef4444" : settings.crosshairColor; ctx.fill();
-            ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke(); ctx.restore();
+            ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke();
             
+            ctx.restore();
             gameLoop = requestAnimationFrame(render);
         }
 
+        // --- GAME FLOW ---
         function startGame(mode) {
             initAudio(); loadData();
-
-            // DERECELİ KORUMASI (Anti-Hile)
-            if(mode === 'ranked') {
-                if(settings.speed === 'slow' || settings.targetType === 'circle' || !settings.approach) {
-                    alert("⚠️ DERECELİ GİRİŞİ REDDEDİLDİ!\n\nRekabetçi girebilmek için hile sayılabilecek ayarları kapatmalısın.\nŞu ayarları düzelt:\n- Hız 'Yavaş' Olamaz.\n- Hedef 'Sadece Klasik' Olamaz.\n- Halka Sistemi KAPALI Olamaz.\n\nLütfen Ayarlar'dan bunları düzeltip tekrar dene.");
-                    return;
-                }
-            }
-
             currentMode = mode; isPlaying = true; 
             score = 0; combo = 0; maxCombo = 0; health = 100; timeLeft = 60;
             stats = {hit300:0, hit100:0, hit50:0, miss:0};
             targets = []; floatingTexts = []; mouseTrail = []; particles = [];
             
-            if(mode === 'ranked') { spawnInterval = 750; approachRate = 1100; currentHitWindow = 200; } 
-            else if(mode === 'frenzy') { spawnInterval = 300; approachRate = 800; currentHitWindow = 150; settings.targetSize = 0.6; }
-            else {
-                if(settings.speed === 'slow') { spawnInterval = 1400; approachRate = 1800; currentHitWindow = 300; }
-                else if(settings.speed === 'fast') { spawnInterval = 550; approachRate = 900; currentHitWindow = 160; }
-                else { spawnInterval = 950; approachRate = 1350; currentHitWindow = 240; }
+            // Mode overrides
+            if(mode === 'ranked') {
+                spawnInterval = 500; approachRate = 900; settings.hitText = false; // Harder
+            } else {
+                if(settings.speed==='slow'){spawnInterval=900; approachRate=1400;}
+                else if(settings.speed==='fast'){spawnInterval=450; approachRate=800;}
+                else {spawnInterval=700; approachRate=1200;}
             }
 
-            document.getElementById('timerDisplay').style.display = (mode === 'endless' || mode === 'sudden_death') ? 'none' : 'block';
-            document.getElementById('healthBarContainer').style.display = (mode === 'endless' || mode === 'sudden_death') ? 'block' : 'none';
+            document.getElementById('timerDisplay').style.display = mode === 'endless' ? 'none' : 'block';
+            document.getElementById('healthBarContainer').style.display = mode === 'endless' ? 'block' : 'none';
             document.getElementById('rpResult').style.display = 'none';
+
             document.querySelectorAll('.screen').forEach(s => s.style.display='none');
             document.getElementById('gameScreen').style.display = 'block';
             
@@ -596,47 +696,73 @@
 
         function endGame() {
             isPlaying = false; document.body.style.cursor = 'default';
-            if (score > profile.highScore && currentMode !== 'frenzy') profile.highScore = score;
-            let rpDiv = document.getElementById('rpResult');
             
+            if (score > profile.highScore) profile.highScore = score;
+
+            let rpDiv = document.getElementById('rpResult');
             if (currentMode === 'ranked') {
-                profile.matchesPlayed++; rpDiv.style.display = 'block';
+                profile.matchesPlayed++;
+                rpDiv.style.display = 'block';
+                
                 if (profile.matchesPlayed <= 3) {
                     profile.totalPlacementScore += score;
                     if (profile.matchesPlayed === 3) {
-                        profile.rp = (profile.totalPlacementScore / 3) / 90; updateRankLogic();
+                        // Calc initial RP based on avg score
+                        profile.rp = (profile.totalPlacementScore / 3) / 100;
+                        updateRankLogic();
                         let rInfo = RANKS.find(r=>r.id===profile.rankId);
                         rpDiv.innerHTML = `Yerleştirme Tamamlandı!<br><span style="color:${rInfo.color}">${rInfo.name}</span> oldun!`;
-                    } else { rpDiv.innerHTML = `Yerleştirme Maçı: ${profile.matchesPlayed}/3`; }
+                    } else {
+                        rpDiv.innerHTML = `Yerleştirme Maçı: ${profile.matchesPlayed}/3`;
+                    }
                 } else {
                     let rInfo = RANKS.find(r=>r.id===profile.rankId);
-                    let expected = rInfo.reqScore || 40000;
-                    let rpChange = score > expected * 1.2 ? 25 : score > expected ? 15 : score > expected * 0.8 ? 5 : score > expected * 0.5 ? -10 : -20;
+                    let expected = rInfo.reqScore || 50000;
+                    
+                    let rpChange = 0;
+                    if(score > expected * 1.2) rpChange = 25;
+                    else if(score > expected) rpChange = 15;
+                    else if(score > expected * 0.8) rpChange = 5;
+                    else if(score > expected * 0.5) rpChange = -10;
+                    else rpChange = -20;
                     
                     profile.rp = Math.max(0, profile.rp + rpChange);
-                    let oldRank = profile.rankId; updateRankLogic();
-                    let color = rpChange >= 0 ? "#4ade80" : "#ef4444"; let sign = rpChange >= 0 ? "+" : "";
+                    
+                    let oldRank = profile.rankId;
+                    updateRankLogic();
+                    
+                    let color = rpChange >= 0 ? "#4ade80" : "#ef4444";
+                    let sign = rpChange >= 0 ? "+" : "";
                     let text = `RP: <span style="color:${color}">${sign}${rpChange}</span> (Toplam: ${Math.round(profile.rp)})`;
+                    
                     if(profile.rankId > oldRank) text += `<br><span style="color:#fbbf24">RÜTBE ATLADIN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
                     else if(profile.rankId < oldRank) text += `<br><span style="color:#ef4444">RÜTBE DÜŞTÜN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
-                    rpDiv.innerHTML = text;
+                    
+                             rpDiv.innerHTML = text;
                 }
                 saveData();
             }
-            document.getElementById('gameOverTitle').innerText = currentMode === 'sudden_death' ? "Kaçırdın ve Öldün!" : currentMode === 'endless' ? "Tükendin!" : "Oyun Bitti!";
+
+            document.getElementById('gameOverTitle').innerText = currentMode === 'endless' ? "Tükendin!" : "Süre Bitti!";
             document.getElementById('finalScore').innerText = score;
             document.getElementById('stat300').innerText = stats.hit300;
             document.getElementById('stat100').innerText = stats.hit100;
             document.getElementById('stat50').innerText = stats.hit50;
             document.getElementById('statMiss').innerText = stats.miss;
             document.getElementById('statMaxCombo').innerText = maxCombo + "x";
+            
             document.getElementById('gameScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
 
-        function goToMenu() { updateMenuUI(); document.getElementById('gameOverScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'flex'; }
+        function goToMenu() {
+            updateMenuUI();
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('menuScreen').style.display = 'flex';
+        }
+
+        // Boot
         loadData();
     </script>
 </body>
 </html>
-
