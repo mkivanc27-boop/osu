@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web-Aim (osu! Style)</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
+        body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
+        
+        .screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: 0.3s; }
+        #menuScreen { background: radial-gradient(circle, #1e293b 0%, #0f172a 100%); }
+        #settingsScreen { background: #1e293b; display: none; }
+        #gameScreen { display: none; cursor: crosshair; }
+        #gameOverScreen { background: rgba(15, 23, 42, 0.9); display: none; z-index: 10; }
+
+        h1 { font-size: 4rem; color: #d946ef; text-shadow: 0 0 20px rgba(217, 70, 239, 0.5); margin-bottom: 2rem; }
+        h2 { font-size: 2.5rem; margin-bottom: 1.5rem; color: #f8fafc; }
+        
+        .btn { background: #c026d3; color: white; border: none; padding: 15px 40px; font-size: 1.5rem; font-weight: bold; border-radius: 8px; cursor: pointer; margin: 10px; transition: 0.2s; text-transform: uppercase; letter-spacing: 2px; }
+        .btn:hover { background: #d946ef; transform: scale(1.05); box-shadow: 0 0 15px #d946ef; }
+        .btn-danger { background: #e11d48; }
+        .btn-danger:hover { background: #f43f5e; box-shadow: 0 0 15px #f43f5e; }
+
+        .settings-container { background: #0f172a; padding: 30px; border-radius: 15px; border: 2px solid #334155; width: 500px; }
+        .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 1.2rem; }
+        select, input[type="range"], input[type="color"] { padding: 10px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 5px; font-size: 1rem; cursor: pointer; }
+
+        #hud { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around; font-size: 2rem; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; }
+        #infoText { position: absolute; bottom: 20px; color: #94a3b8; font-size: 1.2rem; }
+        
+        #crosshair { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 999; display: none; box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+        
+        canvas { display: block; width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+
+    <div id="crosshair"></div>
+
+    <div id="menuScreen" class="screen">
+        <h1>OSU! AIM TRAINER</h1>
+        <div>
+            <button class="btn" onclick="startGame('gridshot')">Gridshot Oyna</button>
+            <button class="btn" onclick="startGame('spidershot')">Spidershot Oyna</button>
+        </div>
+        <button class="btn" style="background: #475569;" onclick="showScreen('settingsScreen')">⚙️ Ayarlar</button>
+    </div>
+
+    <div id="settingsScreen" class="screen">
+        <h2>Ayarlar</h2>
+        <div class="settings-container">
+            <div class="setting-row">
+                <label>Grafik Kalitesi:</label>
+                <select id="gfxSetting" onchange="updateSettings()">
+                    <option value="low">Düşük</option>
+                    <option value="high" selected>Yüksek (Parlamalı)</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label>İmleç Rengi:</label>
+                <input type="color" id="chColorSetting" value="#ffffff" onchange="updateSettings()">
+            </div>
+            <div class="setting-row">
+                <label>Hedef Boyutu Çarpanı:</label>
+                <input type="range" id="targetSizeSetting" min="0.5" max="1.5" step="0.1" value="1" onchange="updateSettings()">
+            </div>
+        </div>
+        <br>
+        <button class="btn btn-danger" onclick="showScreen('menuScreen')">Geri Dön</button>
+    </div>
+
+    <div id="gameScreen" class="screen">
+        <div id="hud">
+            <div>Skor: <span id="scoreDisplay" style="color: #d946ef;">0</span></div>
+            <div>Süre: <span id="timeDisplay" style="color: #f43f5e;">60</span></div>
+        </div>
+        <div id="infoText">Ateş etmek için SPACE, Z veya X tuşlarını kullan</div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="gameOverScreen" class="screen">
+        <h2>Süre Doldu!</h2>
+        <h1 style="color: #d946ef;">Skorun: <span id="finalScore">0</span></h1>
+        <button class="btn" onclick="showScreen('menuScreen')">Ana Menüye Dön</button>
+    </div>
+
+    <script>
+        let score = 0;
+        let timeLeft = 60;
+        let timerInterval;
+        let gameLoop;
+        let targets = [];
+        let currentMode = 'gridshot';
+        let isPlaying = false;
+
+        // Fare koordinatlarını sürekli tutacağımız değişkenler
+        let currentMouseX = 0;
+        let currentMouseY = 0;
+
+        let gfxHigh = true;
+        let targetBaseRadius = 40;
+        let targetRadiusMultiplier = 1;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const crosshair = document.getElementById('crosshair');
+        
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.style.display = 'none');
+            document.getElementById(screenId).style.display = 'flex';
+            if(screenId !== 'gameScreen') {
+                crosshair.style.display = 'none';
+                document.body.style.cursor = 'default';
+            }
+        }
+
+        function updateSettings() {
+            gfxHigh = document.getElementById('gfxSetting').value === 'high';
+            crosshair.style.background = document.getElementById('chColorSetting').value;
+            targetRadiusMultiplier = parseFloat(document.getElementById('targetSizeSetting').value);
+        }
+
+        // Fareyi izle ve koordinatları kaydet
+        document.addEventListener('mousemove', (e) => {
+            if (isPlaying) {
+                currentMouseX = e.clientX;
+                currentMouseY = e.clientY;
+                crosshair.style.left = currentMouseX + 'px';
+                crosshair.style.top = currentMouseY + 'px';
+            }
+        });
+
+        class Target {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.radius = targetBaseRadius * targetRadiusMultiplier;
+                this.maxRadius = this.radius;
+                this.radius = 0; 
+                this.color = '#d946ef'; // Osu pembesi tonları
+            }
+
+            draw() {
+                if(this.radius < this.maxRadius) this.radius += 3;
+
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                if (gfxHigh) {
+                    ctx.shadowBlur = 15;
+                    ctx.shadowColor = this.color;
+                } else {
+                    ctx.shadowBlur = 0;
+                }
+
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+                ctx.closePath();
+
+                // Ortadaki nokta
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius * 0.2, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        function spawnTarget() {
+            let margin = 100;
+            let x = margin + Math.random() * (canvas.width - margin * 2);
+            let y = margin + Math.random() * (canvas.height - margin * 2);
+            targets.push(new Target(x, y));
+        }
+
+        function startGame(mode) {
+            updateSettings();
+            currentMode = mode;
+            score = 0;
+            timeLeft = 60;
+            targets = [];
+            isPlaying = true;
+            
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('timeDisplay').innerText = timeLeft;
+            
+            showScreen('gameScreen');
+            document.body.style.cursor = 'none'; 
+            crosshair.style.display = 'block';
+
+            if (mode === 'gridshot') {
+                spawnTarget(); spawnTarget(); spawnTarget();
+            } else if (mode === 'spidershot') {
+                spawnTarget();
+            }
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timeDisplay').innerText = timeLeft;
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+
+            cancelAnimationFrame(gameLoop);
+            render();
+        }
+
+        function render() {
+            if (!isPlaying) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            targets.forEach(target => target.draw());
+            gameLoop = requestAnimationFrame(render);
+        }
+
+        // Vuruş Fonksiyonu (Hem Mouse Hem Klavye Kullanabilsin Diye Ayırdık)
+        function attemptHit() {
+            if (!isPlaying) return;
+
+            for (let i = targets.length - 1; i >= 0; i--) {
+                let t = targets[i];
+                let dist = Math.hypot(currentMouseX - t.x, currentMouseY - t.y);
+                
+                if (dist < t.maxRadius) {
+                    targets.splice(i, 1);
+                    score += 100;
+                    document.getElementById('scoreDisplay').innerText = score;
+                    
+                    // crosshair tepkisi (tıklandığını belli et)
+                    crosshair.style.transform = 'translate(-50%, -50%) scale(1.5)';
+                    setTimeout(() => { crosshair.style.transform = 'translate(-50%, -50%) scale(1)'; }, 50);
+                    
+                    if (currentMode === 'gridshot') {
+                        spawnTarget();
+                    } else if (currentMode === 'spidershot') {
+                        if (targets.length === 0) {
+                            targets.push(new Target(canvas.width/2, canvas.height/2));
+                        } else {
+                            spawnTarget();
+                        }
+                    }
+                    break; 
+                }
+            }
+        }
+
+        // --- KLAVYE İLE VURMA (OSU MANTIĞI) ---
+        document.addEventListener('keydown', (e) => {
+            // Sadece Space, Z veya X tuşlarına basılırsa
+            if (e.code === 'Space' || e.key.toLowerCase() === 'z' || e.key.toLowerCase() === 'x') {
+                if(isPlaying) e.preventDefault(); // Space'e basınca sayfa aşağı kaymasın
+                attemptHit();
+            }
+        });
+
+        // İsteyen fare sol tıkla da vurmaya devam edebilir
+        canvas.addEventListener('mousedown', attemptHit);
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(timerInterval);
+            document.getElementById('finalScore').innerText = score;
+            showScreen('gameOverScreen');
+        }
+
+        showScreen('menuScreen');
+    </script>
+</body>
+</html>
+
