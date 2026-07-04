@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web-Aim (Definitive Edition)</title>
+    <title>Osu Faceİt</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: white; overflow: hidden; transition: background-color 0.3s; }
@@ -73,7 +73,7 @@
     <div id="flashOverlay"></div>
 
     <div id="menuScreen" class="screen">
-        <h1>KOZMİK AİM</h1>
+        <h1>OSU FACEİT</h1>
         
         <div class="profile-box">
             <div class="profile-name" id="menuName">Oyuncu</div>
@@ -167,7 +167,7 @@
                         <option value="standard">Standart Çizgi (Herkes)</option>
                         <option value="neon" id="optNeon" disabled>Neon Parlaması (Altın Göz+)</option>
                         <option value="stardust" id="optStardust" disabled>Yıldız Tozu (Elmas Refleks+)</option>
-                        <option value="cosmic" id="optCosmic" disabled>Kozmik Alev (KOZMİK AİM)</option>
+                        <option value="cosmic" id="optCosmic" disabled>Kozmik Alev (OSU FACEİT)</option>
                     </select>
                 </div>
                 <div class="setting-row">
@@ -208,8 +208,7 @@
         </div>
         <button class="btn" onclick="goToMenu()">Ana Menüye Dön</button>
     </div>
-
-    <script>
+        <script>
         // --- CONSTANTS & RANKS ---
         const RANKS = [
             { id: 0, name: "Yerleştirme", minRP: -9999, color: "#64748b" },
@@ -218,7 +217,7 @@
             { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 70000 },
             { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 100000 },
             { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 150000 },
-            { id: 6, name: "KOZMİK AİM", minRP: 1600, color: "#ef4444", reqScore: 220000 }
+            { id: 6, name: "OSU FACEİT", minRP: 1600, color: "#ef4444", reqScore: 220000 }
         ];
 
         // --- GLOBAL STATE ---
@@ -283,7 +282,74 @@
                 profile.rankId = currentRank.id;
             }
         }
-                    settings.targetOuter = document.getElementById('colorTargetOuter').value;
+
+        function updateMenuUI() {
+            document.getElementById('menuName').innerText = profile.name;
+            const rInfo = RANKS.find(r => r.id === profile.rankId);
+            
+            let rankText = rInfo.name;
+            if (profile.rankId === 0) rankText = `Yerleştirme (${profile.matchesPlayed}/3)`;
+            
+            document.getElementById('menuRank').innerText = rankText;
+            document.getElementById('menuRank').style.color = rInfo.color;
+            document.getElementById('menuRP').innerText = profile.rankId === 0 ? "Bilinmiyor" : `Derece Puanı (RP): ${Math.round(profile.rp)}`;
+            document.getElementById('menuMatches').innerText = profile.matchesPlayed;
+            document.getElementById('menuHighScore').innerText = profile.highScore;
+            
+            document.body.style.backgroundColor = settings.bg;
+
+            // Unlock cosmetics logic
+            document.getElementById('optNeon').disabled = profile.rankId < 3; 
+            document.getElementById('optStardust').disabled = profile.rankId < 4; 
+            document.getElementById('optCosmic').disabled = profile.rankId < 6; 
+
+            // If selected locked, revert
+            if(settings.trailType === "neon" && profile.rankId < 3) settings.trailType = "standard";
+            if(settings.trailType === "stardust" && profile.rankId < 4) settings.trailType = "standard";
+            if(settings.trailType === "cosmic" && profile.rankId < 6) settings.trailType = "standard";
+        }
+
+        // --- SETTINGS UI ---
+        function switchTab(e, tabId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        function openSettings() {
+            applySettingsToUI();
+            document.getElementById('menuScreen').style.display = 'none';
+            document.getElementById('settingsScreen').style.display = 'flex';
+        }
+
+        function applySettingsToUI() {
+            document.getElementById('setTargetType').value = settings.targetType;
+            document.getElementById('setSpeed').value = settings.speed;
+            document.getElementById('setShake').checked = settings.shake;
+            document.getElementById('setHitText').checked = settings.hitText;
+            
+            document.getElementById('colorBg').value = settings.bg;
+            document.getElementById('colorTargetInner').value = settings.targetInner;
+            document.getElementById('colorTargetOuter').value = settings.targetOuter;
+            document.getElementById('sizeTarget').value = settings.targetSize;
+            document.getElementById('colorCrosshair').value = settings.crosshairColor;
+            document.getElementById('sizeCrosshair').value = settings.crosshairSize;
+            
+            document.getElementById('setProfileName').value = profile.name;
+            document.getElementById('setTrailType').value = settings.trailType;
+            document.getElementById('colorTrail').value = settings.trailColor;
+        }
+
+        function saveAndCloseSettings() {
+            settings.targetType = document.getElementById('setTargetType').value;
+            settings.speed = document.getElementById('setSpeed').value;
+            settings.shake = document.getElementById('setShake').checked;
+            settings.hitText = document.getElementById('setHitText').checked;
+            
+            settings.bg = document.getElementById('colorBg').value;
+            settings.targetInner = document.getElementById('colorTargetInner').value;
+            settings.targetOuter = document.getElementById('colorTargetOuter').value;
             settings.targetSize = parseFloat(document.getElementById('sizeTarget').value);
             settings.crosshairColor = document.getElementById('colorCrosshair').value;
             settings.crosshairSize = parseInt(document.getElementById('sizeCrosshair').value);
@@ -400,8 +466,7 @@
                 ctx.restore();
             }
         }
-
-        // --- GAME LOGIC ---
+                    // --- GAME LOGIC ---
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -486,8 +551,12 @@
             }
         }
 
-        // --- INPUTS ---
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+        // --- INPUTS & RESIZE ---
+        function resizeCanvas() {
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
         
         function trackMouse(e) {
             if(!isPlaying) return;
@@ -664,7 +733,7 @@
                     if(profile.rankId > oldRank) text += `<br><span style="color:#fbbf24">RÜTBE ATLADIN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
                     else if(profile.rankId < oldRank) text += `<br><span style="color:#ef4444">RÜTBE DÜŞTÜN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
                     
-                            rpDiv.innerHTML = text;
+                             rpDiv.innerHTML = text;
                 }
                 saveData();
             }
@@ -692,3 +761,4 @@
     </script>
 </body>
 </html>
+
