@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web-Aim (osu! Style)</title>
+    <title>Web-Aim (True Osu! Mechanics)</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
         body { background-color: #0f172a; color: white; font-family: 'Segoe UI', sans-serif; overflow: hidden; }
@@ -26,10 +26,18 @@
         .setting-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: 1.2rem; }
         select, input[type="range"], input[type="color"] { padding: 10px; background: #1e293b; color: white; border: 1px solid #475569; border-radius: 5px; font-size: 1rem; cursor: pointer; }
 
-        #hud { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around; font-size: 2rem; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; }
-        #infoText { position: absolute; bottom: 20px; color: #94a3b8; font-size: 1.2rem; }
+        /* Yeni HUD (Combo, İsabet Oranı vb.) */
+        #hud { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around; font-size: 1.8rem; font-weight: bold; pointer-events: none; text-shadow: 2px 2px 4px #000; }
+        .hud-item { display: flex; flex-direction: column; align-items: center; }
+        .hud-label { font-size: 1rem; color: #94a3b8; text-transform: uppercase; }
         
-        #crosshair { position: absolute; width: 12px; height: 12px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 999; display: none; box-shadow: 0 0 10px rgba(255,255,255,0.8); }
+        #comboDisplay { color: #38bdf8; font-size: 2.5rem; }
+        #accDisplay { color: #4ade80; }
+        #scoreDisplay { color: #d946ef; }
+
+        #infoText { position: absolute; bottom: 20px; color: #94a3b8; font-size: 1.2rem; font-weight: bold; }
+        
+        #crosshair { position: absolute; width: 14px; height: 14px; background: #fff; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; z-index: 999; display: none; box-shadow: 0 0 10px rgba(255,255,255,1); }
         
         canvas { display: block; width: 100vw; height: 100vh; }
     </style>
@@ -39,11 +47,8 @@
     <div id="crosshair"></div>
 
     <div id="menuScreen" class="screen">
-        <h1>OSU! AIM TRAINER</h1>
-        <div>
-            <button class="btn" onclick="startGame('gridshot')">Gridshot Oyna</button>
-            <button class="btn" onclick="startGame('spidershot')">Spidershot Oyna</button>
-        </div>
+        <h1>OSU! RHYTHM AIM</h1>
+        <button class="btn" onclick="startGame()">Oyuna Başla</button>
         <button class="btn" style="background: #475569;" onclick="showScreen('settingsScreen')">⚙️ Ayarlar</button>
     </div>
 
@@ -51,15 +56,12 @@
         <h2>Ayarlar</h2>
         <div class="settings-container">
             <div class="setting-row">
-                <label>Grafik Kalitesi:</label>
-                <select id="gfxSetting" onchange="updateSettings()">
-                    <option value="low">Düşük</option>
-                    <option value="high" selected>Yüksek (Parlamalı)</option>
+                <label>Oyun Hızı (BPM Hissi):</label>
+                <select id="speedSetting" onchange="updateSettings()">
+                    <option value="slow">Yavaş (Yeni Başlayan)</option>
+                    <option value="normal" selected>Normal</option>
+                    <option value="fast">Hızlı (Hardcore)</option>
                 </select>
-            </div>
-            <div class="setting-row">
-                <label>İmleç Rengi:</label>
-                <input type="color" id="chColorSetting" value="#ffffff" onchange="updateSettings()">
             </div>
             <div class="setting-row">
                 <label>Hedef Boyutu Çarpanı:</label>
@@ -72,8 +74,10 @@
 
     <div id="gameScreen" class="screen">
         <div id="hud">
-            <div>Skor: <span id="scoreDisplay" style="color: #d946ef;">0</span></div>
-            <div>Süre: <span id="timeDisplay" style="color: #f43f5e;">60</span></div>
+            <div class="hud-item"><span class="hud-label">Skor</span><span id="scoreDisplay">0</span></div>
+            <div class="hud-item"><span class="hud-label">Süre</span><span id="timeDisplay" style="color: #f43f5e;">60</span></div>
+            <div class="hud-item"><span class="hud-label">İsabet</span><span id="accDisplay">100%</span></div>
+            <div class="hud-item"><span class="hud-label">Combo</span><span id="comboDisplay">0x</span></div>
         </div>
         <div id="infoText">Ateş etmek için SPACE, Z veya X tuşlarını kullan</div>
         <canvas id="gameCanvas"></canvas>
@@ -81,25 +85,36 @@
 
     <div id="gameOverScreen" class="screen">
         <h2>Süre Doldu!</h2>
-        <h1 style="color: #d946ef;">Skorun: <span id="finalScore">0</span></h1>
+        <h1 style="color: #d946ef;">Skor: <span id="finalScore">0</span></h1>
+        <h2 style="color: #4ade80;">İsabet: <span id="finalAcc">100%</span></h2>
         <button class="btn" onclick="showScreen('menuScreen')">Ana Menüye Dön</button>
     </div>
 
     <script>
+        // Oyun Değişkenleri
         let score = 0;
+        let combo = 0;
+        let hits = 0;
+        let totalClicks = 0; // İsabet oranı için
         let timeLeft = 60;
         let timerInterval;
         let gameLoop;
-        let targets = [];
-        let currentMode = 'gridshot';
         let isPlaying = false;
 
-        // Fare koordinatlarını sürekli tutacağımız değişkenler
-        let currentMouseX = 0;
-        let currentMouseY = 0;
+        let targets = [];
+        let floatingTexts = [];
 
-        let gfxHigh = true;
-        let targetBaseRadius = 40;
+        // Osu Mekanikleri Değişkenleri
+        let lastSpawnTime = 0;
+        let spawnInterval = 700; // Kaç ms'de bir hedef çıkacak
+        let approachRate = 1200;  // Halkanın kapanma süresi (ms)
+        let hitWindow = 150;     // Halka kapandıktan sonra kaç ms içinde vurulabilir
+
+        // Fare Koordinatları
+        let currentMouseX = window.innerWidth / 2;
+        let currentMouseY = window.innerHeight / 2;
+
+        let targetBaseRadius = 45;
         let targetRadiusMultiplier = 1;
 
         const canvas = document.getElementById('gameCanvas');
@@ -123,12 +138,14 @@
         }
 
         function updateSettings() {
-            gfxHigh = document.getElementById('gfxSetting').value === 'high';
-            crosshair.style.background = document.getElementById('chColorSetting').value;
             targetRadiusMultiplier = parseFloat(document.getElementById('targetSizeSetting').value);
+            let speed = document.getElementById('speedSetting').value;
+            if(speed === 'slow') { spawnInterval = 1000; approachRate = 1600; }
+            if(speed === 'normal') { spawnInterval = 700; approachRate = 1200; }
+            if(speed === 'fast') { spawnInterval = 400; approachRate = 800; }
         }
 
-        // Fareyi izle ve koordinatları kaydet
+        // Fare Takibi
         document.addEventListener('mousemove', (e) => {
             if (isPlaying) {
                 currentMouseX = e.clientX;
@@ -138,72 +155,132 @@
             }
         });
 
+        // Ekranda süzülen yazılar (300, 100, Miss vb.)
+        class FloatingText {
+            constructor(x, y, text, color) {
+                this.x = x;
+                this.y = y;
+                this.text = text;
+                this.color = color;
+                this.life = 1.0; // 1'den 0'a düşerek opaklığı azaltacak
+            }
+            draw(ctx) {
+                this.y -= 1; // Yukarı doğru süzül
+                this.life -= 0.02; // Solma hızı
+                ctx.globalAlpha = Math.max(0, this.life);
+                ctx.fillStyle = this.color;
+                ctx.font = "bold 30px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(this.text, this.x, this.y);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        // Osu Tarzı Hedef Sınıfı
         class Target {
-            constructor(x, y) {
+            constructor(x, y, spawnTime) {
                 this.x = x;
                 this.y = y;
                 this.radius = targetBaseRadius * targetRadiusMultiplier;
-                this.maxRadius = this.radius;
-                this.radius = 0; 
-                this.color = '#d946ef'; // Osu pembesi tonları
+                
+                // Yaklaşan halkanın başlangıç boyutu (hedefin 3 katı büyüklüğünde)
+                this.approachRadius = this.radius * 3; 
+                this.spawnTime = spawnTime;
+                
+                this.active = true;
+                this.color = '#d946ef'; // İç renk (Pembe)
             }
 
-            draw() {
-                if(this.radius < this.maxRadius) this.radius += 3;
+            update(currentTime) {
+                let age = currentTime - this.spawnTime;
 
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                // Yaklaşan halkanın animasyonu (approachRate süresine göre daralır)
+                let progress = age / approachRate;
+                this.approachRadius = (this.radius * 3) - ((this.radius * 2) * progress);
                 
-                if (gfxHigh) {
-                    ctx.shadowBlur = 15;
-                    ctx.shadowColor = this.color;
-                } else {
-                    ctx.shadowBlur = 0;
+                // Halka, hedefin boyutundan daha fazla küçülemez
+                if (this.approachRadius < this.radius) {
+                    this.approachRadius = this.radius;
                 }
 
+                // EĞER ZAMANINDA VURULMAZSA (Miss Durumu)
+                if (age > approachRate + hitWindow) {
+                    this.active = false;
+                    combo = 0; // Combo sıfırla
+                    totalClicks++; // Tıkladı say ama puan yok (İsabeti düşürür)
+                    updateHUD();
+                    floatingTexts.push(new FloatingText(this.x, this.y, "X", "#e11d48")); // Kırmızı X (Miss)
+                }
+            }
+
+            draw(ctx, currentTime) {
+                let age = currentTime - this.spawnTime;
+                
+                // Fade In efekti (ilk 200ms)
+                ctx.globalAlpha = Math.min(1, age / 200);
+
+                // Hedefin Kendisi
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fillStyle = this.color;
                 ctx.fill();
                 ctx.lineWidth = 3;
-                ctx.strokeStyle = '#fff';
+                ctx.strokeStyle = '#ffffff';
                 ctx.stroke();
                 ctx.closePath();
 
-                // Ortadaki nokta
+                // Merkezdeki Küçük Nokta
                 ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius * 0.2, 0, Math.PI * 2);
-                ctx.fillStyle = '#fff';
+                ctx.arc(this.x, this.y, this.radius * 0.15, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
                 ctx.fill();
                 ctx.closePath();
+
+                // Yaklaşan Halka (Approach Circle)
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.approachRadius, 0, Math.PI * 2);
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = `rgba(255, 255, 255, ${Math.max(0, 1 - (this.approachRadius - this.radius) / (this.radius * 2))})`;
+                ctx.stroke();
+                ctx.closePath();
+
+                ctx.globalAlpha = 1.0;
             }
         }
 
-        function spawnTarget() {
-            let margin = 100;
-            let x = margin + Math.random() * (canvas.width - margin * 2);
-            let y = margin + Math.random() * (canvas.height - margin * 2);
-            targets.push(new Target(x, y));
+        // HUD Güncelleme (Combo, İsabet)
+        function updateHUD() {
+            document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('comboDisplay').innerText = combo + "x";
+            
+            let acc = totalClicks > 0 ? Math.round((hits / totalClicks) * 100) : 100;
+            document.getElementById('accDisplay').innerText = acc + "%";
+            
+            // Combo rengi animasyonu
+            let comboEl = document.getElementById('comboDisplay');
+            if(combo > 10) comboEl.style.color = "#fbbf24"; // Sarı
+            else if(combo > 20) comboEl.style.color = "#f43f5e"; // Kırmızı
+            else comboEl.style.color = "#38bdf8"; // Mavi
         }
 
-        function startGame(mode) {
+        function startGame() {
             updateSettings();
-            currentMode = mode;
             score = 0;
+            combo = 0;
+            hits = 0;
+            totalClicks = 0;
             timeLeft = 60;
             targets = [];
+            floatingTexts = [];
+            lastSpawnTime = performance.now();
             isPlaying = true;
             
-            document.getElementById('scoreDisplay').innerText = score;
+            updateHUD();
             document.getElementById('timeDisplay').innerText = timeLeft;
             
             showScreen('gameScreen');
             document.body.style.cursor = 'none'; 
             crosshair.style.display = 'block';
-
-            if (mode === 'gridshot') {
-                spawnTarget(); spawnTarget(); spawnTarget();
-            } else if (mode === 'spidershot') {
-                spawnTarget();
-            }
 
             clearInterval(timerInterval);
             timerInterval = setInterval(() => {
@@ -213,63 +290,117 @@
             }, 1000);
 
             cancelAnimationFrame(gameLoop);
-            render();
+            requestAnimationFrame(render);
         }
 
-        function render() {
+        function render(currentTime) {
             if (!isPlaying) return;
+            
+            // Ritim bazlı hedef yaratma
+            if (currentTime - lastSpawnTime > spawnInterval) {
+                let margin = 100;
+                let x = margin + Math.random() * (canvas.width - margin * 2);
+                let y = margin + Math.random() * (canvas.height - margin * 2);
+                targets.push(new Target(x, y, currentTime));
+                lastSpawnTime = currentTime;
+            }
+
+            // Ekranı temizle
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            targets.forEach(target => target.draw());
+
+            // Hedefleri Güncelle ve Çiz (Arkadan Öne)
+            for (let i = 0; i < targets.length; i++) {
+                targets[i].update(currentTime);
+            }
+            // Sadece aktif (süresi bitmemiş) hedefleri tut
+            targets = targets.filter(t => t.active);
+
+            targets.forEach(t => t.draw(ctx, currentTime));
+
+            // Süzülen Yazıları Çiz ve Temizle
+            floatingTexts.forEach(ft => ft.draw(ctx));
+            floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+
             gameLoop = requestAnimationFrame(render);
         }
 
-        // Vuruş Fonksiyonu (Hem Mouse Hem Klavye Kullanabilsin Diye Ayırdık)
+        // Vuruş (Klavye veya Fare ile)
         function attemptHit() {
             if (!isPlaying) return;
+            let currentTime = performance.now();
+            let hitSomething = false;
 
-            for (let i = targets.length - 1; i >= 0; i--) {
+            // En eski hedefi bul (Osu mantığı: Önce çıkanı vur)
+            for (let i = 0; i < targets.length; i++) {
                 let t = targets[i];
                 let dist = Math.hypot(currentMouseX - t.x, currentMouseY - t.y);
                 
-                if (dist < t.maxRadius) {
-                    targets.splice(i, 1);
-                    score += 100;
-                    document.getElementById('scoreDisplay').innerText = score;
+                // Fare hedefin içindeyse
+                if (dist < t.radius) {
+                    hitSomething = true;
+                    totalClicks++; // Tıklama sayısını artır (İsabet için)
                     
-                    // crosshair tepkisi (tıklandığını belli et)
+                    let age = currentTime - t.spawnTime;
+                    let timeDifference = Math.abs(approachRate - age); // Halkanın tam oturma anına ne kadar uzak?
+
+                    let points = 0;
+                    let textMsg = "";
+                    let textColor = "";
+
+                    // Zamanlama Hassasiyeti (Osu 300, 100, 50 sistemi)
+                    if (timeDifference <= 50) {
+                        points = 300; textMsg = "300"; textColor = "#38bdf8"; // Kusursuz
+                    } else if (timeDifference <= 120) {
+                        points = 100; textMsg = "100"; textColor = "#4ade80"; // İyi
+                    } else if (timeDifference <= hitWindow) {
+                        points = 50; textMsg = "50"; textColor = "#fbbf24";  // Erken/Geç
+                    }
+
+                    if (points > 0) {
+                        score += points + (combo * 10); // Combo çarpanı
+                        combo++;
+                        hits++;
+                        floatingTexts.push(new FloatingText(t.x, t.y, textMsg, textColor));
+                    } else {
+                        combo = 0; // Çok erken basılırsa miss
+                        floatingTexts.push(new FloatingText(t.x, t.y, "X", "#e11d48"));
+                    }
+
+                    t.active = false; // Hedefi yok et
+                    
+                    // Crosshair tepkisi
                     crosshair.style.transform = 'translate(-50%, -50%) scale(1.5)';
                     setTimeout(() => { crosshair.style.transform = 'translate(-50%, -50%) scale(1)'; }, 50);
                     
-                    if (currentMode === 'gridshot') {
-                        spawnTarget();
-                    } else if (currentMode === 'spidershot') {
-                        if (targets.length === 0) {
-                            targets.push(new Target(canvas.width/2, canvas.height/2));
-                        } else {
-                            spawnTarget();
-                        }
-                    }
-                    break; 
+                    updateHUD();
+                    break; // Tek seferde bir hedef vur
                 }
+            }
+
+            // Eğer boşluğa tıklandıysa (İsabet oranını düşür ve comboyu boz)
+            if (!hitSomething && targets.length > 0) {
+                totalClicks++;
+                combo = 0;
+                updateHUD();
             }
         }
 
-        // --- KLAVYE İLE VURMA (OSU MANTIĞI) ---
+        // KLAVYE KONTROLLERİ (Z, X, SPACE)
         document.addEventListener('keydown', (e) => {
-            // Sadece Space, Z veya X tuşlarına basılırsa
             if (e.code === 'Space' || e.key.toLowerCase() === 'z' || e.key.toLowerCase() === 'x') {
-                if(isPlaying) e.preventDefault(); // Space'e basınca sayfa aşağı kaymasın
+                if(isPlaying) e.preventDefault();
                 attemptHit();
             }
         });
 
-        // İsteyen fare sol tıkla da vurmaya devam edebilir
         canvas.addEventListener('mousedown', attemptHit);
 
         function endGame() {
             isPlaying = false;
             clearInterval(timerInterval);
             document.getElementById('finalScore').innerText = score;
+            let acc = totalClicks > 0 ? Math.round((hits / totalClicks) * 100) : 100;
+            document.getElementById('finalAcc').innerText = acc + "%";
             showScreen('gameOverScreen');
         }
 
@@ -277,4 +408,3 @@
     </script>
 </body>
 </html>
-
