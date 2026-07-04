@@ -2,11 +2,13 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Osu Faceİt</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: #0f172a; color: white; overflow: hidden; transition: background-color 0.3s; }
+        /* FİXLENDİ: user-select: none; genelden kaldırılıp sadece body'e eklendi, input/select'ler serbest bırakıldı. */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #0f172a; color: white; overflow: hidden; transition: background-color 0.3s; user-select: none; -webkit-user-select: none; }
+        input, select, textarea, button { user-select: auto; -webkit-user-select: auto; cursor: pointer; }
         
         .screen { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
         #menuScreen { background: radial-gradient(circle, rgba(30,41,59,0.8) 0%, rgba(15,23,42,1) 100%); z-index: 20; }
@@ -38,10 +40,12 @@
         .tab-content.active { display: flex; }
         
         .setting-row { display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 20px; border-radius: 8px; font-size: 1.1rem; border: 1px solid #334155; }
-        .setting-row label { color: #e2e8f0; font-weight: 600; }
-        input[type="text"], select, input[type="range"] { padding: 8px 12px; background: #334155; color: white; border: 1px solid #475569; border-radius: 5px; font-size: 1rem; outline: none; }
+        .setting-row label { color: #e2e8f0; font-weight: 600; flex: 1;}
+        input[type="text"], select, input[type="range"] { padding: 8px 12px; background: #334155; color: white; border: 1px solid #475569; border-radius: 5px; font-size: 1rem; outline: none; max-width: 50%; }
+        /* FİXLENDİ: Menü arka planı siyah olunca yazılar görünmüyordu, beyaz yapıldı */
+        select option { background: #1e293b; color: white; }
         input[type="color"] { width: 40px; height: 40px; border: none; border-radius: 5px; cursor: pointer; background: transparent; }
-        input[type="checkbox"] { width: 20px; height: 20px; accent-color: #d946ef; cursor: pointer; }
+        input[type="checkbox"] { width: 22px; height: 22px; accent-color: #d946ef; cursor: pointer; }
 
         #hud { position: absolute; top: 15px; right: 25px; display: flex; flex-direction: column; align-items: flex-end; pointer-events: none; z-index: 5; text-shadow: 2px 2px 4px #000; }
         #scoreDisplay { font-size: 2.5rem; color: #fff; font-weight: 900; line-height: 1; margin-bottom: 5px; }
@@ -65,7 +69,6 @@
     </style>
 </head>
 <body>
-
     <div id="flashOverlay"></div>
 
     <div id="menuScreen" class="screen">
@@ -104,7 +107,7 @@
                     <label>Antrenman Hedef Tipi:</label>
                     <select id="setTargetType">
                         <option value="mixed">Karışık (Önerilen)</option>
-                        <option value="circle">Sadece Klasik (Kaydırmasız)</option>
+                        <option value="circle">Sadece Klasik</option>
                         <option value="slider">Sadece Slider</option>
                     </select>
                 </div>
@@ -181,16 +184,16 @@
             <div class="stat-item" style="grid-column: span 2; text-align: center;">Maksimum Kombo: <span id="statMaxCombo" style="float: none; color: #d946ef;">0</span></div>
         </div>
         <button class="btn" onclick="goToMenu()">Ana Menüye Dön</button>
-    </div>
-        <script>
+                                                                                                   </div>
+                                                                                                       <script>
         const RANKS = [
             { id: 0, name: "Yerleştirme", minRP: -9999, color: "#64748b" },
-            { id: 1, name: "Çaylak", minRP: 0, color: "#94a3b8", reqScore: 15000 },
-            { id: 2, name: "Gümüş Hedef", minRP: 200, color: "#cbd5e1", reqScore: 30000 },
-            { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 55000 },
-            { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 80000 },
-            { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 110000 },
-            { id: 6, name: "OSU FACEİT", minRP: 1600, color: "#ef4444", reqScore: 160000 }
+            { id: 1, name: "Bronz", minRP: 0, color: "#d97706", reqScore: 15000 },
+            { id: 2, name: "Gümüş", minRP: 200, color: "#cbd5e1", reqScore: 30000 },
+            { id: 3, name: "Altın", minRP: 400, color: "#fbbf24", reqScore: 55000 },
+            { id: 4, name: "Elmas", minRP: 700, color: "#38bdf8", reqScore: 80000 },
+            { id: 5, name: "Zümrüt", minRP: 1100, color: "#10b981", reqScore: 110000 },
+            { id: 6, name: "Zenith", minRP: 1600, color: "#ef4444", reqScore: 160000 }
         ];
 
         const canvas = document.getElementById('gameCanvas');
@@ -329,7 +332,8 @@
                 ctx.fillText(this.text, this.x, this.y); ctx.restore();
             }
         }
-                    class Target {
+        
+        class Target {
             constructor(x, y, time, isSlider) {
                 this.x = x; this.y = y; this.spawnTime = time; this.active = true;
                 this.type = isSlider ? 'slider' : 'circle';
@@ -348,7 +352,7 @@
                 
                 if (this.type === 'circle' || (this.type === 'slider' && this.state === 'waiting')) {
                     if(!settings.approach) {
-                        this.apprRadius = this.radius; // Halka yok, süresiz
+                        this.apprRadius = this.radius; 
                     } else {
                         this.apprRadius = (this.radius * 3.5) - ((this.radius * 2.5) * (age / approachRate));
                         if (this.apprRadius < this.radius) this.apprRadius = this.radius;
@@ -515,127 +519,8 @@
             ctx.save(); ctx.fillStyle = settings.bg; ctx.fillRect(0,0, canvas.width, canvas.height);
             if (screenShake > 0) { ctx.translate((Math.random()-.5)*screenShake, (Math.random()-.5)*screenShake); screenShake--; }
 
-            let limit = !settings.approach ? 15 : 99; // Çok fazla süresiz top birikmesini engeller
+            let limit = !settings.approach ? 15 : 99; 
             if (time - lastSpawnTime > spawnInterval && targets.length < limit) {
                 let m = 150, x = m + Math.random()*(canvas.width-m*2), y = m + Math.random()*(canvas.height-m*2);
                 let isSlider = false;
-                if(settings.targetType === 'slider') isSlider = true;
-                if(settings.targetType === 'mixed' && Math.random() < 0.25) isSlider = true;
-                if(currentMode === 'ranked' && Math.random() < 0.35) isSlider = true;
-                if(currentMode === 'frenzy') isSlider = false; // Kaos modunda slider olmaz
-                
-                targets.push(new Target(x, y, time, isSlider)); lastSpawnTime = time;
-            }
-
-            if (settings.trailType !== "none" && mouseTrail.length > 1) {
-                ctx.beginPath(); ctx.moveTo(mouseTrail[0].x, mouseTrail[0].y);
-                for(let i=1; i<mouseTrail.length; i++) { ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y); mouseTrail[i].life -= 0.05; }
-                ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = settings.trailType === "neon" ? 8 : 4;
-                let tColor = settings.trailColor;
-                if(settings.trailType === "neon") { ctx.shadowBlur=15; ctx.shadowColor="#d946ef"; tColor="#d946ef"; }
-                if(settings.trailType === "stardust") tColor = "#fbbf24";
-                if(settings.trailType === "cosmic") { ctx.shadowBlur=20; ctx.shadowColor="#ef4444"; tColor="#ef4444"; }
-                ctx.strokeStyle = tColor; ctx.globalAlpha = mouseTrail[mouseTrail.length-1].life;
-                ctx.stroke(); ctx.globalAlpha = 1; ctx.shadowBlur = 0;
-                mouseTrail = mouseTrail.filter(t => t.life > 0);
-            }
-
-            particles.forEach(p => { p.update(); p.draw(ctx); }); particles = particles.filter(p => p.alpha > 0);
-            
-            // SLIDER DENGESİZLİĞİ ÇÖZÜMÜ: Aktif slider varken diğer topların süresi duraklıyor
-            let sliderActive = targets.some(t => t.type === 'slider' && t.state === 'active');
-            targets.forEach(t => { 
-                if(sliderActive && t.state !== 'active') t.spawnTime += dt; 
-                t.update(time); t.draw(ctx, time); 
-            }); 
-            targets = targets.filter(t => t.active);
-            
-            floatingTexts.forEach(ft => ft.draw(ctx)); floatingTexts = floatingTexts.filter(ft => ft.life > 0);
-
-            ctx.beginPath(); ctx.arc(currentMouseX, currentMouseY, isHolding ? settings.crosshairSize * 0.7 : settings.crosshairSize, 0, Math.PI*2);
-            ctx.fillStyle = isHolding ? "#ef4444" : settings.crosshairColor; ctx.fill();
-            ctx.lineWidth=2; ctx.strokeStyle="#000"; ctx.stroke(); ctx.restore();
-            
-            gameLoop = requestAnimationFrame(render);
-        }
-
-        function startGame(mode) {
-            initAudio(); loadData();
-
-            // DERECELİ KORUMASI (Anti-Hile)
-            if(mode === 'ranked') {
-                if(settings.speed === 'slow' || settings.targetType === 'circle' || !settings.approach) {
-                    alert("⚠️ DERECELİ GİRİŞİ REDDEDİLDİ!\n\nRekabetçi girebilmek için hile sayılabilecek ayarları kapatmalısın.\nŞu ayarları düzelt:\n- Hız 'Yavaş' Olamaz.\n- Hedef 'Sadece Klasik' Olamaz.\n- Halka Sistemi KAPALI Olamaz.\n\nLütfen Ayarlar'dan bunları düzeltip tekrar dene.");
-                    return;
-                }
-            }
-
-            currentMode = mode; isPlaying = true; 
-            score = 0; combo = 0; maxCombo = 0; health = 100; timeLeft = 60;
-            stats = {hit300:0, hit100:0, hit50:0, miss:0};
-            targets = []; floatingTexts = []; mouseTrail = []; particles = [];
-            
-            if(mode === 'ranked') { spawnInterval = 750; approachRate = 1100; currentHitWindow = 200; } 
-            else if(mode === 'frenzy') { spawnInterval = 300; approachRate = 800; currentHitWindow = 150; settings.targetSize = 0.6; }
-            else {
-                if(settings.speed === 'slow') { spawnInterval = 1400; approachRate = 1800; currentHitWindow = 300; }
-                else if(settings.speed === 'fast') { spawnInterval = 550; approachRate = 900; currentHitWindow = 160; }
-                else { spawnInterval = 950; approachRate = 1350; currentHitWindow = 240; }
-            }
-
-            document.getElementById('timerDisplay').style.display = (mode === 'endless' || mode === 'sudden_death') ? 'none' : 'block';
-            document.getElementById('healthBarContainer').style.display = (mode === 'endless' || mode === 'sudden_death') ? 'block' : 'none';
-            document.getElementById('rpResult').style.display = 'none';
-            document.querySelectorAll('.screen').forEach(s => s.style.display='none');
-            document.getElementById('gameScreen').style.display = 'block';
-            
-            resizeCanvas(); updateHUD();
-            lastTickTime = lastSpawnTime = performance.now();
-            cancelAnimationFrame(gameLoop); requestAnimationFrame(render);
-        }
-
-        function endGame() {
-            isPlaying = false; document.body.style.cursor = 'default';
-            if (score > profile.highScore && currentMode !== 'frenzy') profile.highScore = score;
-            let rpDiv = document.getElementById('rpResult');
-            
-            if (currentMode === 'ranked') {
-                profile.matchesPlayed++; rpDiv.style.display = 'block';
-                if (profile.matchesPlayed <= 3) {
-                    profile.totalPlacementScore += score;
-                    if (profile.matchesPlayed === 3) {
-                        profile.rp = (profile.totalPlacementScore / 3) / 90; updateRankLogic();
-                        let rInfo = RANKS.find(r=>r.id===profile.rankId);
-                        rpDiv.innerHTML = `Yerleştirme Tamamlandı!<br><span style="color:${rInfo.color}">${rInfo.name}</span> oldun!`;
-                    } else { rpDiv.innerHTML = `Yerleştirme Maçı: ${profile.matchesPlayed}/3`; }
-                } else {
-                    let rInfo = RANKS.find(r=>r.id===profile.rankId);
-                    let expected = rInfo.reqScore || 40000;
-                    let rpChange = score > expected * 1.2 ? 25 : score > expected ? 15 : score > expected * 0.8 ? 5 : score > expected * 0.5 ? -10 : -20;
-                    
-                    profile.rp = Math.max(0, profile.rp + rpChange);
-                    let oldRank = profile.rankId; updateRankLogic();
-                    let color = rpChange >= 0 ? "#4ade80" : "#ef4444"; let sign = rpChange >= 0 ? "+" : "";
-                    let text = `RP: <span style="color:${color}">${sign}${rpChange}</span> (Toplam: ${Math.round(profile.rp)})`;
-                    if(profile.rankId > oldRank) text += `<br><span style="color:#fbbf24">RÜTBE ATLADIN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
-                    else if(profile.rankId < oldRank) text += `<br><span style="color:#ef4444">RÜTBE DÜŞTÜN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
-                    rpDiv.innerHTML = text;
-                }
-                saveData();
-            }
-            document.getElementById('gameOverTitle').innerText = currentMode === 'sudden_death' ? "Kaçırdın ve Öldün!" : currentMode === 'endless' ? "Tükendin!" : "Oyun Bitti!";
-            document.getElementById('finalScore').innerText = score;
-            document.getElementById('stat300').innerText = stats.hit300;
-            document.getElementById('stat100').innerText = stats.hit100;
-            document.getElementById('stat50').innerText = stats.hit50;
-            document.getElementById('statMiss').innerText = stats.miss;
-            document.getElementById('statMaxCombo').innerText = maxCombo + "x";
-            document.getElementById('gameScreen').style.display = 'none';
-            document.getElementById('gameOverScreen').style.display = 'flex';
-        }
-
-        function goToMenu() { updateMenuUI(); document.getElementById('gameOverScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'flex'; }
-        loadData();
-    </script>
-</body>
-</html>
+               
