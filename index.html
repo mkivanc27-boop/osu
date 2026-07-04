@@ -111,11 +111,11 @@
                     </select>
                 </div>
                 <div class="setting-row">
-                    <label>Oyun Hızı:</label>
+                    <label>Oyun Hızı (Antrenman):</label>
                     <select id="setSpeed">
-                        <option value="slow">Yavaş</option>
-                        <option value="normal">Normal</option>
-                        <option value="fast">Hızlı</option>
+                        <option value="slow">Yavaş (Çok Rahat)</option>
+                        <option value="normal">Normal (Dengeli)</option>
+                        <option value="fast">Hızlı (Zorlu)</option>
                     </select>
                 </div>
                 <div class="setting-row">
@@ -143,7 +143,7 @@
                 </div>
                 <div class="setting-row">
                     <label>Hedef Boyutu Çarpanı:</label>
-                    <input type="range" id="sizeTarget" min="0.5" max="1.5" step="0.1">
+                    <input type="range" id="sizeTarget" min="0.6" max="1.6" step="0.1">
                 </div>
                 <div class="setting-row">
                     <label>Crosshair Rengi:</label>
@@ -212,12 +212,12 @@
         // --- CONSTANTS & RANKS ---
         const RANKS = [
             { id: 0, name: "Yerleştirme", minRP: -9999, color: "#64748b" },
-            { id: 1, name: "Çaylak", minRP: 0, color: "#94a3b8", reqScore: 20000 },
-            { id: 2, name: "Gümüş Hedef", minRP: 200, color: "#cbd5e1", reqScore: 40000 },
-            { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 70000 },
-            { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 100000 },
-            { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 150000 },
-            { id: 6, name: "OSU FACEİT", minRP: 1600, color: "#ef4444", reqScore: 220000 }
+            { id: 1, name: "Çaylak", minRP: 0, color: "#94a3b8", reqScore: 15000 },
+            { id: 2, name: "Gümüş Hedef", minRP: 200, color: "#cbd5e1", reqScore: 30000 },
+            { id: 3, name: "Altın Göz", minRP: 400, color: "#fbbf24", reqScore: 55000 },
+            { id: 4, name: "Elmas Refleks", minRP: 700, color: "#38bdf8", reqScore: 80000 },
+            { id: 5, name: "Yüce Nişancı", minRP: 1100, color: "#c026d3", reqScore: 110000 },
+            { id: 6, name: "OSU FACEİT", minRP: 1600, color: "#ef4444", reqScore: 160000 }
         ];
 
         // --- GLOBAL STATE ---
@@ -250,7 +250,7 @@
         };
 
         // Base game variables
-        let spawnInterval = 700, approachRate = 1200, hitWindow = 150, baseRadius = 45;
+        let spawnInterval = 900, approachRate = 1300, currentHitWindow = 220, baseRadius = 45;
 
         // --- INIT & STORAGE ---
         function loadData() {
@@ -270,9 +270,9 @@
 
         function updateRankLogic() {
             if (profile.matchesPlayed < 3) {
-                profile.rankId = 0; // Yerleştirme
+                profile.rankId = 0;
             } else {
-                let currentRank = RANKS[1]; // default Çaylak
+                let currentRank = RANKS[1];
                 for (let i = RANKS.length - 1; i >= 1; i--) {
                     if (profile.rp >= RANKS[i].minRP) {
                         currentRank = RANKS[i];
@@ -298,12 +298,10 @@
             
             document.body.style.backgroundColor = settings.bg;
 
-            // Unlock cosmetics logic
             document.getElementById('optNeon').disabled = profile.rankId < 3; 
             document.getElementById('optStardust').disabled = profile.rankId < 4; 
             document.getElementById('optCosmic').disabled = profile.rankId < 6; 
 
-            // If selected locked, revert
             if(settings.trailType === "neon" && profile.rankId < 3) settings.trailType = "standard";
             if(settings.trailType === "stardust" && profile.rankId < 4) settings.trailType = "standard";
             if(settings.trailType === "cosmic" && profile.rankId < 6) settings.trailType = "standard";
@@ -378,9 +376,7 @@
             draw(ctx) {
                 ctx.save(); ctx.globalAlpha = Math.max(0, this.alpha);
                 ctx.fillStyle = this.color;
-                if(this.type === "stardust") {
-                    ctx.shadowBlur = 10; ctx.shadowColor = this.color;
-                }
+                if(this.type === "stardust") { ctx.shadowBlur = 10; ctx.shadowColor = this.color; }
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fill(); ctx.restore();
             }
@@ -398,8 +394,7 @@
                 ctx.fillText(this.text, this.x, this.y); ctx.restore();
             }
         }
-
-        class Target {
+                    class Target {
             constructor(x, y, time, isSlider) {
                 this.x = x; this.y = y; this.spawnTime = time; this.active = true;
                 this.type = isSlider ? 'slider' : 'circle';
@@ -420,17 +415,17 @@
                     this.apprRadius = (this.radius * 3.5) - ((this.radius * 2.5) * (age / approachRate));
                     if (this.apprRadius < this.radius) this.apprRadius = this.radius;
                     
-                    if (age > approachRate + hitWindow) {
+                    if (age > approachRate + currentHitWindow) {
                         this.active = false; registerMiss(this.x, this.y);
                     }
                 } else if (this.type === 'slider' && this.state === 'active') {
-                    let prog = (time - this.hitTime) / 600; // slider duration
+                    let prog = (time - this.hitTime) / 700; 
                     if (prog >= 1) {
                         this.active = false; registerHit(300, this.endX, this.endY, true);
                     } else {
                         this.ballX = this.x + (this.endX - this.x) * prog;
                         this.ballY = this.y + (this.endY - this.y) * prog;
-                        if (!isHolding || Math.hypot(currentMouseX - this.ballX, currentMouseY - this.ballY) > this.radius * 2.5) {
+                        if (!isHolding || Math.hypot(currentMouseX - this.ballX, currentMouseY - this.ballY) > this.radius * 2.6) {
                             this.active = false; registerMiss(this.ballX, this.ballY);
                         }
                     }
@@ -466,7 +461,8 @@
                 ctx.restore();
             }
         }
-                    // --- GAME LOGIC ---
+
+        // --- GAME LOGIC ---
         function initAudio() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
@@ -476,13 +472,11 @@
             if (!audioCtx) return;
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            
             if (type === 300) { osc.frequency.value = 880; osc.type = 'sine'; }
             else if (type === 100) { osc.frequency.value = 587; osc.type = 'sine'; }
             else if (type === 50) { osc.frequency.value = 440; osc.type = 'sine'; }
             else if (type === 'miss') { osc.frequency.value = 150; osc.type = 'sawtooth'; }
-            
-            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
             gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
             osc.start(); osc.stop(audioCtx.currentTime + 0.15);
         }
@@ -490,39 +484,29 @@
         function registerMiss(x, y) {
             playSound('miss'); combo = 0; stats.miss++;
             if(settings.hitText) floatingTexts.push(new FloatingText(x, y, "X", "#e11d48"));
-            if(settings.shake) screenShake = 8;
+            if(settings.shake) screenShake = 6;
             let flash = document.getElementById('flashOverlay');
             flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 80);
-            
-            if (currentMode === 'endless') {
-                health -= 10; updateHUD();
-                if(health <= 0) endGame();
-            }
+            if (currentMode === 'endless') { health -= 8; updateHUD(); if(health <= 0) endGame(); }
             updateHUD();
         }
 
         function registerHit(pts, x, y, isSliderEnd=false) {
-            score += pts + (combo * (currentMode === 'ranked' ? 15 : 10)); 
+            score += pts + (combo * (currentMode === 'ranked' ? 12 : 8)); 
             combo++; if(combo > maxCombo) maxCombo = combo;
-            
             if(pts === 300) stats.hit300++; else if(pts===100) stats.hit100++; else stats.hit50++;
-            if(currentMode === 'endless') health = Math.min(100, health + 2);
-            
+            if(currentMode === 'endless') health = Math.min(100, health + 3);
             playSound(pts);
             if(settings.hitText && !isSliderEnd) {
                 let color = pts===300 ? "#38bdf8" : pts===100 ? "#4ade80" : "#fbbf24";
                 floatingTexts.push(new FloatingText(x, y, pts, color));
             }
-            
-            // Particles based on Trail/Cosmetic setting
             let pColor = pts===300 ? settings.targetInner : "#fff";
             let pType = "normal";
             if(settings.trailType === "stardust") { pColor = "#fcd34d"; pType = "stardust"; }
             if(settings.trailType === "cosmic") { pColor = "#ef4444"; pType = "cosmic"; }
-            
-            for(let i=0; i<(pts===300?10:5); i++) particles.push(new Particle(x, y, pColor, pType));
-            
-            if(settings.shake && pts===300) screenShake = 3;
+            for(let i=0; i<(pts===300?8:4); i++) particles.push(new Particle(x, y, pColor, pType));
+            if(settings.shake && pts===300) screenShake = 2;
             updateHUD();
         }
 
@@ -532,10 +516,12 @@
             for (let i = 0; i < targets.length; i++) {
                 let t = targets[i]; if(t.active === false || t.state === 'active') continue;
                 
-                if (Math.hypot(currentMouseX - t.x, currentMouseY - t.y) < t.radius * 1.5) {
+                if (Math.hypot(currentMouseX - t.x, currentMouseY - t.y) < t.radius * 1.6) {
                     let diff = Math.abs(approachRate - (tnow - t.spawnTime));
                     let pts = 0;
-                    if(diff <= 70) pts = 300; else if(diff <= 140) pts = 100; else if(diff <= hitWindow) pts = 50;
+                    if(diff <= currentHitWindow * 0.4) pts = 300; 
+                    else if(diff <= currentHitWindow * 0.75) pts = 100; 
+                    else if(diff <= currentHitWindow) pts = 50;
                     
                     if (pts > 0) {
                         if (t.type === 'slider') {
@@ -551,11 +537,7 @@
             }
         }
 
-        // --- INPUTS & RESIZE ---
-        function resizeCanvas() {
-            canvas.width = window.innerWidth; 
-            canvas.height = window.innerHeight;
-        }
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
         window.addEventListener('resize', resizeCanvas);
         
         function trackMouse(e) {
@@ -567,7 +549,6 @@
             }
         }
         document.addEventListener('mousemove', trackMouse);
-        
         document.addEventListener('mousedown', (e) => { e.preventDefault(); initAudio(); isHolding=true; trackMouse(e); attemptHit(); });
         document.addEventListener('mouseup', () => isHolding=false);
         document.addEventListener('keydown', (e) => {
@@ -577,16 +558,13 @@
         });
         document.addEventListener('keyup', (e) => { let k = e.key.toLowerCase(); if(k==='z' || k==='x') isHolding=false; });
 
-        // --- RENDER LOOP ---
         function updateHUD() {
             document.getElementById('scoreDisplay').innerText = score;
             document.getElementById('comboDisplay').innerText = combo + "x";
-            document.getElementById('comboDisplay').style.color = combo > 50 ? "#c026d3" : combo > 20 ? "#fbbf24" : "#38bdf8";
-            
+            document.getElementById('comboDisplay').style.color = combo > 40 ? "#c026d3" : combo > 15 ? "#fbbf24" : "#38bdf8";
             let total = stats.hit300 + stats.hit100 + stats.hit50 + stats.miss;
             let acc = total > 0 ? Math.round(((stats.hit300 + stats.hit100*0.66 + stats.hit50*0.33) / total)*100) : 100;
             document.getElementById('accDisplay').innerText = acc + "%";
-            
             if(currentMode === 'endless') {
                 document.getElementById('healthBar').style.width = health + "%";
                 document.getElementById('healthBar').style.background = health > 50 ? "#10b981" : health > 20 ? "#fbbf24" : "#ef4444";
@@ -597,60 +575,42 @@
             if(!isPlaying) return;
             let dt = time - lastTickTime; lastTickTime = time;
             
-            // Timer logic for 60s modes
             if(currentMode !== 'endless') {
                 timeLeft -= dt/1000;
                 document.getElementById('timerDisplay').innerText = Math.max(0, timeLeft).toFixed(1);
                 if(timeLeft <= 0) { endGame(); return; }
             }
 
-            ctx.save();
-            ctx.fillStyle = settings.bg; ctx.fillRect(0,0, canvas.width, canvas.height);
-            
+            ctx.save(); ctx.fillStyle = settings.bg; ctx.fillRect(0,0, canvas.width, canvas.height);
             if (screenShake > 0) { ctx.translate((Math.random()-.5)*screenShake, (Math.random()-.5)*screenShake); screenShake--; }
 
-            // Spawner
             if (time - lastSpawnTime > spawnInterval) {
                 let m = 150, x = m + Math.random()*(canvas.width-m*2), y = m + Math.random()*(canvas.height-m*2);
                 let isSlider = false;
                 if(settings.targetType === 'slider') isSlider = true;
-                if(settings.targetType === 'mixed' && Math.random() < 0.3) isSlider = true;
-                if(currentMode === 'ranked' && Math.random() < 0.4) isSlider = true; // Ranked has forced sliders
-                
+                if(settings.targetType === 'mixed' && Math.random() < 0.25) isSlider = true;
+                if(currentMode === 'ranked' && Math.random() < 0.35) isSlider = true;
                 targets.push(new Target(x, y, time, isSlider));
                 lastSpawnTime = time;
             }
 
-            // Trails
             if (settings.trailType !== "none" && mouseTrail.length > 1) {
                 ctx.beginPath(); ctx.moveTo(mouseTrail[0].x, mouseTrail[0].y);
-                for(let i=1; i<mouseTrail.length; i++) {
-                    ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y);
-                    mouseTrail[i].life -= 0.05;
-                }
+                for(let i=1; i<mouseTrail.length; i++) { ctx.lineTo(mouseTrail[i].x, mouseTrail[i].y); mouseTrail[i].life -= 0.05; }
                 ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = settings.trailType === "neon" ? 8 : 4;
-                
                 let tColor = settings.trailColor;
                 if(settings.trailType === "neon") { ctx.shadowBlur=15; ctx.shadowColor="#d946ef"; tColor="#d946ef"; }
                 if(settings.trailType === "stardust") tColor = "#fbbf24";
                 if(settings.trailType === "cosmic") { ctx.shadowBlur=20; ctx.shadowColor="#ef4444"; tColor="#ef4444"; }
-                
                 ctx.strokeStyle = tColor; ctx.globalAlpha = mouseTrail[mouseTrail.length-1].life;
                 ctx.stroke(); ctx.globalAlpha = 1; ctx.shadowBlur = 0;
                 mouseTrail = mouseTrail.filter(t => t.life > 0);
             }
 
-            // Draw objects
-            particles.forEach(p => { p.update(); p.draw(ctx); });
-            particles = particles.filter(p => p.alpha > 0);
-            
-            targets.forEach(t => { t.update(time); t.draw(ctx, time); });
-            targets = targets.filter(t => t.active);
-            
-            floatingTexts.forEach(ft => ft.draw(ctx));
-            floatingTexts = floatingTexts.filter(ft => ft.life > 0);
+            particles.forEach(p => { p.update(); p.draw(ctx); }); particles = particles.filter(p => p.alpha > 0);
+            targets.forEach(t => { t.update(time); t.draw(ctx, time); }); targets = targets.filter(t => t.active);
+            floatingTexts.forEach(ft => ft.draw(ctx)); floatingTexts = floatingTexts.filter(ft => ft.life > 0);
 
-            // Crosshair
             ctx.beginPath();
             ctx.arc(currentMouseX, currentMouseY, isHolding ? settings.crosshairSize * 0.7 : settings.crosshairSize, 0, Math.PI*2);
             ctx.fillStyle = isHolding ? "#ef4444" : settings.crosshairColor; ctx.fill();
@@ -660,7 +620,6 @@
             gameLoop = requestAnimationFrame(render);
         }
 
-        // --- GAME FLOW ---
         function startGame(mode) {
             initAudio(); loadData();
             currentMode = mode; isPlaying = true; 
@@ -668,19 +627,18 @@
             stats = {hit300:0, hit100:0, hit50:0, miss:0};
             targets = []; floatingTexts = []; mouseTrail = []; particles = [];
             
-            // Mode overrides
+            // Re-tuned Insanely Dynamic Difficulties
             if(mode === 'ranked') {
-                spawnInterval = 500; approachRate = 900; settings.hitText = false; // Harder
+                spawnInterval = 750; approachRate = 1100; currentHitWindow = 200; 
             } else {
-                if(settings.speed==='slow'){spawnInterval=900; approachRate=1400;}
-                else if(settings.speed==='fast'){spawnInterval=450; approachRate=800;}
-                else {spawnInterval=700; approachRate=1200;}
+                if(settings.speed === 'slow') { spawnInterval = 1400; approachRate = 1800; currentHitWindow = 300; }
+                else if(settings.speed === 'fast') { spawnInterval = 550; approachRate = 900; currentHitWindow = 160; }
+                else { spawnInterval = 950; approachRate = 1350; currentHitWindow = 240; }
             }
 
             document.getElementById('timerDisplay').style.display = mode === 'endless' ? 'none' : 'block';
             document.getElementById('healthBarContainer').style.display = mode === 'endless' ? 'block' : 'none';
             document.getElementById('rpResult').style.display = 'none';
-
             document.querySelectorAll('.screen').forEach(s => s.style.display='none');
             document.getElementById('gameScreen').style.display = 'block';
             
@@ -691,29 +649,22 @@
 
         function endGame() {
             isPlaying = false; document.body.style.cursor = 'default';
-            
             if (score > profile.highScore) profile.highScore = score;
-
             let rpDiv = document.getElementById('rpResult');
+            
             if (currentMode === 'ranked') {
-                profile.matchesPlayed++;
-                rpDiv.style.display = 'block';
-                
+                profile.matchesPlayed++; rpDiv.style.display = 'block';
                 if (profile.matchesPlayed <= 3) {
                     profile.totalPlacementScore += score;
                     if (profile.matchesPlayed === 3) {
-                        // Calc initial RP based on avg score
-                        profile.rp = (profile.totalPlacementScore / 3) / 100;
+                        profile.rp = (profile.totalPlacementScore / 3) / 90;
                         updateRankLogic();
                         let rInfo = RANKS.find(r=>r.id===profile.rankId);
                         rpDiv.innerHTML = `Yerleştirme Tamamlandı!<br><span style="color:${rInfo.color}">${rInfo.name}</span> oldun!`;
-                    } else {
-                        rpDiv.innerHTML = `Yerleştirme Maçı: ${profile.matchesPlayed}/3`;
-                    }
+                    } else { rpDiv.innerHTML = `Yerleştirme Maçı: ${profile.matchesPlayed}/3`; }
                 } else {
                     let rInfo = RANKS.find(r=>r.id===profile.rankId);
-                    let expected = rInfo.reqScore || 50000;
-                    
+                    let expected = rInfo.reqScore || 40000;
                     let rpChange = 0;
                     if(score > expected * 1.2) rpChange = 25;
                     else if(score > expected) rpChange = 15;
@@ -722,22 +673,16 @@
                     else rpChange = -20;
                     
                     profile.rp = Math.max(0, profile.rp + rpChange);
-                    
-                    let oldRank = profile.rankId;
-                    updateRankLogic();
-                    
+                    let oldRank = profile.rankId; updateRankLogic();
                     let color = rpChange >= 0 ? "#4ade80" : "#ef4444";
                     let sign = rpChange >= 0 ? "+" : "";
                     let text = `RP: <span style="color:${color}">${sign}${rpChange}</span> (Toplam: ${Math.round(profile.rp)})`;
-                    
                     if(profile.rankId > oldRank) text += `<br><span style="color:#fbbf24">RÜTBE ATLADIN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
                     else if(profile.rankId < oldRank) text += `<br><span style="color:#ef4444">RÜTBE DÜŞTÜN! ${RANKS.find(r=>r.id===profile.rankId).name}</span>`;
-                    
-                             rpDiv.innerHTML = text;
+                    rpDiv.innerHTML = text;
                 }
                 saveData();
             }
-
             document.getElementById('gameOverTitle').innerText = currentMode === 'endless' ? "Tükendin!" : "Süre Bitti!";
             document.getElementById('finalScore').innerText = score;
             document.getElementById('stat300').innerText = stats.hit300;
@@ -745,20 +690,12 @@
             document.getElementById('stat50').innerText = stats.hit50;
             document.getElementById('statMiss').innerText = stats.miss;
             document.getElementById('statMaxCombo').innerText = maxCombo + "x";
-            
             document.getElementById('gameScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'flex';
         }
 
-        function goToMenu() {
-            updateMenuUI();
-            document.getElementById('gameOverScreen').style.display = 'none';
-            document.getElementById('menuScreen').style.display = 'flex';
-        }
-
-        // Boot
+        function goToMenu() { updateMenuUI(); document.getElementById('gameOverScreen').style.display = 'none'; document.getElementById('menuScreen').style.display = 'flex'; }
         loadData();
     </script>
 </body>
 </html>
-
